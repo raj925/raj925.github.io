@@ -1080,7 +1080,6 @@ class Governor {
      * @return {Object} a JSON object with JSON strings containing rawData and processedData
      */
     compileSelf() {
-        console.log(JSON.stringify(processData(this)));
             return {
                 rawData: JSON.stringify(this),
                 processedData: JSON.stringify(processData(this))
@@ -1102,13 +1101,11 @@ class Governor {
                 } catch(e) {
                     text = this.responseText;
                 }
-                console.log(text);
             }
         };
         ask.setRequestHeader('Content-Type', 'application/x-www-form-urlencoded');
         let info = encodeURI('data='+JSON.stringify(this.compileSelf()));
         let bla = decodeURI(info).substr(5)
-        console.log(JSON.parse(bla));
         ask.send(info);
     }
 
