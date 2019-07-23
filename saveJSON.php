@@ -94,7 +94,8 @@ $body = date('Y_m_d_H_i_s') . "_" . $id;
         if (!file_exists($filename)) {
             try {
                 $handle = fopen($filename, "w+b");
-                fwrite($handle, stripslashes(json_encode($json)));
+                //fwrite($handle, stripslashes(json_encode($json)));
+                stream_copy_to_stream(stripslashes(json_encode($json)), $handle);
                 fclose($handle);
             }
             catch (Exception $e)
