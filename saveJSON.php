@@ -48,7 +48,7 @@ function sulk($err, $code) {
 
 // Unpack POST data
 $tmp = file_get_contents("php://input");
-$tmp = parse_str($tmp,$json);
+$tmp2 = parse_str($tmp,$json);
 $json = json_decode($json["data"],true);
 
 $id = (string) $json["participantId"][0]; 
@@ -94,8 +94,11 @@ $body = date('Y_m_d_H_i_s') . "_" . $id;
         if (!file_exists($filename)) {
             try {
                 $handle = fopen($filename, "w+b");
-                //fwrite($handle, stripslashes(json_encode($json)));
-                stream_copy_to_stream(stripslashes(json_encode($json)), $handle);
+                while (($data = fread($tmp, 1024)) !== FALSE) 
+                {
+                    fwrite($handle, stripslashes(json_encode($json)));
+                }   
+                //stream_copy_to_stream(stripslashes(json_encode($json)), $handle);
                 fclose($handle);
             }
             catch (Exception $e)
