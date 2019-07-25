@@ -107,6 +107,7 @@ $body = date('Y_m_d_H_i_s') . "_" . $id;
             catch (Exception $e)
             {
                 echo 'Caught exception: ',  $e->getMessage(), "\n";
+                sulk($e, 400);
                 sulk("Unable to create file.", 500);
             }
         } else
