@@ -36,7 +36,7 @@ An JSON string is returned with the following properties:
 error_reporting(E_ALL);
 ini_set("display_errors", 1);
 include("file_with_errors.php");
-//ini_set("display_errors", true);
+ini_set("display_errors", true);
 ini_set("auto_detect_line_endings", true);
 $log = "";
 
@@ -107,7 +107,6 @@ $body = date('Y_m_d_H_i_s') . "_" . $id;
             catch (Exception $e)
             {
                 echo 'Caught exception: ',  $e->getMessage(), "\n";
-                sulk($e, 400);
                 sulk("Unable to create file.", 500);
             }
         } else
