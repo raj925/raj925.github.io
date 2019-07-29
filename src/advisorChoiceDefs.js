@@ -1813,7 +1813,7 @@ class AdvisorChoice extends DotTask {
             choiceImgs.push(img);
             if(a === 0) {
                 let p = display_element.appendChild(document.createElement('p'));
-                p.innerText = 'Click on a portrait to hear the advisor\'s advice';
+                p.innerText = 'Click on a portrait to see the advisor\'s advice';
                 p.className = 'advisorChoice-choice';
             }
         }
