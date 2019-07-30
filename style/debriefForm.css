@@ -32,6 +32,21 @@ div#debriefManipulationQuestion {
     margin-bottom: 0.5em;
 }
 
+#demoCommentQuestion0
+{
+    margin-bottom:30px;
+}
+
+#demoCommentQuestion1
+{
+    margin-bottom:30px;
+}
+
 textarea {
     resize: none;
+    position:absolute;
+    left:50%;
+    margin-right: -50%;
+    transform: translate(-50%, -50%);
+    margin-top: -5px;
 }

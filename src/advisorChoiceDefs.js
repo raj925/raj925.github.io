@@ -666,10 +666,10 @@ class DotTask extends Governor {
         let div = document.querySelector('.jspsych-content').appendChild(document.createElement('div'));
         div.id = 'demoContainer';
         div.className = 'demo';
-        let header = div.appendChild(document.createElement('h1'));
-        header.id = 'demoTitle';
-        div.className = 'demo';
-        header.innerText = 'first...';
+        //let header = div.appendChild(document.createElement('h1'));
+        //header.id = 'demoTitle';
+        //div.className = 'demo';
+        //header.innerText = 'first...';
         let form = div.appendChild(document.createElement('form'));
         form.id = 'demoForm';
         form.className = 'demo';
@@ -1568,12 +1568,13 @@ class AdvisorChoice extends DotTask {
         //     yOffset -= 21;
         // marker.style.top = yOffset.toString() + 'px';
 
+        let adjustedWidth = slider.clientWidth*0.75;
         let xOffset = this.currentTrial.answer[0] === 1? slider.clientWidth/2 : 0;
         let xDistance = this.currentTrial.answer[0] === 1?
             this.currentTrial.confidence[0] : 51 - this.currentTrial.confidence[0];
         xOffset -= marker.clientWidth/2;
-        marker.style.left = (xOffset + xDistance * (slider.clientWidth-marker.clientWidth)
-            / 100).toString() + 'px';
+        marker.style.left = Math.floor((xOffset + xDistance * (slider.clientWidth-marker.clientWidth)
+            / 100)+(slider.clientWidth*(1/6))).toString() + 'px';
 
         // and call the slider-click function because we only get one on_load call
         this.setSliderClick();
@@ -1803,7 +1804,7 @@ class AdvisorChoice extends DotTask {
             let advisor = this.getAdvisorById(choices[a]);
             let advisorDiv = advisor.draw(display_element);
             advisorDiv.classList.add('advisorChoice-choice');
-            let img = advisorDiv.querySelector('img');
+            let img = advisorDiv.querySelector('p');
             img.classList.add('advisorChoice-choice', 'advisor-portrait');
             img.id = 'advisorChoice-choice-' + a.toString();
             advisorDiv.addEventListener('click', function () {

@@ -57,6 +57,7 @@ div.advisorChoice-slider-label {
     line-height: 1.2em;
     transform: scaleY(2);
     z-index: 9;
+    width: 28%;
 }
 div.advisorChoice-slider-label-mid {
     width: 99%;
@@ -111,9 +112,16 @@ div.advisorChoice-choice:hover div.jspsych-jas-present-advice-image {
     width: 100%;
 }
 .jspsych-btn {
-    width: 100%;
+    width: 75%;
     position: relative;
     top: 25px;
+}
+
+#jspsych-instructions-next
+{
+    left:50%;
+    margin-right: -50%;
+    transform: translate(-50%, -50%);
 }
 
 #progressbar-outer {
@@ -192,12 +200,16 @@ div.jspsych-jas-present-advice-arrow {
 }
 
 div.jspsych-jas-present-advice-arrow-left {
-    left: calc(50% - 2.9em);
+    left: 50%;
+    margin-right: -50%;
+    transform: translate(-50%,0%);
     text-align: center;
 }
 
 div.jspsych-jas-present-advice-arrow-right {
-    left: calc(50% - 3em);
+    left: 50%;
+    margin-right: -50%;
+    transform: translate(-50%,0%);
     text-align: right;
 }
 
@@ -333,3 +345,5 @@ p.group2 {
     transform: scale(2);
     margin-top: .5em;
 }
+
+    

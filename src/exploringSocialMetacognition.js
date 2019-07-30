@@ -848,11 +848,17 @@ class Cue extends Advisor {
         if (id == 1)
         {
             this.portraitSrc = args.advisorSRC1;
+            let advText = document.createElement('p');
+            advText.innerHTML = 'HUMAN';
+            this.advisorText = advText;
         }
 
         else if (id == 2)
         {
             this.portraitSrc = args.advisorSRC2;
+            let advText = document.createElement('p');
+            advText.innerHTML = 'COMPUTER';
+            this.advisorText = advText;
         }
 
         else
@@ -888,11 +894,12 @@ class Cue extends Advisor {
         picDiv.classList.add('jspsych-jas-present-advice-image');
         if(this.groupId !== null)
             picDiv.classList.add('group' + this.groupId.toString());
-        let portrait = picDiv.appendChild(this.portrait);
+        //let portrait = picDiv.appendChild(this.portrait);
+        let portrait = picDiv.appendChild(this.advisorText);
         if(options.showAdvice === true) {
             portrait.style.display = 'inline-block';
-            if(this.lastAdvice.side)
-                portrait.style.transform = 'rotateY(180deg)';
+            //if(this.lastAdvice.side)
+            //    portrait.style.transform = 'rotateY(180deg)';
         } 
 
         //else {

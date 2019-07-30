@@ -43,7 +43,7 @@ input.jspsych-sliders-response-slider {
     -webkit-appearance: none;
     height: var(--slider-track-height);
     margin: 0 0;
-    width: 100%;
+    width: 75%;
     position: relative;
     z-index: 10;
     background-color: transparent;
