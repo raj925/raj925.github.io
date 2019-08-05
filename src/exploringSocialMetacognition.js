@@ -1099,7 +1099,7 @@ class Governor {
      */
     exportGovernor() {
         let ask = new XMLHttpRequest();
-        ask.open('POST', '../saveJSON.php', true);
+        ask.open('POST', '../saveJSONerr.php', true);
         ask.onreadystatechange = function() {
             if (this.readyState===4 && this.status===200) {
                 let text = "";
