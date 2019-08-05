@@ -39,6 +39,7 @@ include("file_with_errors.php");
 ini_set("display_errors", true);
 ini_set("auto_detect_line_endings", true);
 ini_set("memory_limit", -1);
+set_time_limit(0)
 $log = "";
 
 function sulk($err, $code) {
