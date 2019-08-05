@@ -616,7 +616,10 @@
         canvasHeight: testCanvas.h,
         on_load: ()=>gov.showAdvice(),
         check_response: (trialresponse)=>gov.checkResponse(trialresponse),
-        on_finish: (trial)=>gov.finalResponse(trial)
+        on_finish: (trial)=>{
+            gov.finalResponse(trial);
+            gov.fullscreenMode();
+        }
     };
 
     /* Feedback shows a tick on the target box */
@@ -1010,7 +1013,15 @@
         h1.innerText = 'Outdated Browser';
         document.querySelector('#initText').innerHTML = 'Your browser is an old version which does not meet the requirements for participating in this study. Please upgrade to the latest version of your browser.';
        h1.parentElement.appendChild(document.createElement('p')).innerHTML = 'Instructions for how to do this can be found at <a href="https://browser-update.org/update.html">https://browser-update.org/update.html</a>.';
-    } else {  
+    } 
+
+    else if (/Android|webOS|iPhone|iPad|iPod|BlackBerry|BB|PlayBook|IEMobile|Windows Phone|Kindle|Silk|Opera Mini/i.test(navigator.userAgent)) {
+        h1 = document.querySelector('#initHeader');
+        h1.innerText = 'Mobile Device Detected';
+        document.querySelector('#initText').innerHTML = 'This study currently does not support mobile devices. Please complete the study on a desktop computer or laptop.';
+    }
+
+    else {  
             jsPsych.init({
                 timeline: timeline,
                 on_finish: ()=>gov.drawDebriefForm()
