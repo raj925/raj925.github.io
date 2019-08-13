@@ -62,7 +62,7 @@
     // (If no comments, that variable is not functional yet so LEAVE IT AS IS!)
 
     const betaTest = true;  // If true, uses a shortened number of trials for quicker testing purposes
-    const doInstruct = false; // If true, shows instructions.
+    const doInstruct = true; // If true, shows instructions.
     const doQuestionnaire = false; // If true, includes questionnaires. 
     const demoQuestions = true; // If true, asks participants for age and gender. Stored in a private folder.
 
@@ -93,7 +93,7 @@
                                      // If false, staircasing only applies in the practice blocks,
                                      // and is then fixed after those blocks.
     const stopIfZero = false;
-    const beepIfIncorrect = false; // If true, play sound if trial is incorrect (see incorrectAudioSrc)
+    const beepIfIncorrect = true; // If true, play sound if trial is incorrect (see incorrectAudioSrc)
 
     const advisor1Src = 'assets/image/human.jpg'; // Filepath for advisor 1 image
     const advisor2Src = 'assets/image/comp.jpg'; // Filepath for advisor 2 image
@@ -162,6 +162,7 @@
     let pracBlock = [];
     let regBlock = [];
     let blk4 = [];
+    // We add some blocks of catch trials at the start.
     if (betaTest == true)
     {
         for (let f=0;f<numOfPracticeBlocks;f++)
@@ -334,6 +335,20 @@
         on_load: ()=>gov.drawProgressBar(),
         on_finish: (trial)=>{
             gov.fullscreenMode();
+            gov.storeMiscTrialData(trial);
+        }
+    };
+
+        /* define thank you message at the end of the experiment */
+    const thanks = {
+        type: 'instructions',
+        pages: [
+        '<img width="1000" height="700" src="./instructions/Slide18.jpeg"></img>'
+        ],
+        show_clickable_nav: true,
+        //on_load: ()=>gov.drawDemographicForm(),
+        on_load: ()=>gov.fullscreenMode(),
+        on_finish: (trial)=>{
             gov.storeMiscTrialData(trial);
         }
     };
@@ -883,25 +898,6 @@
         while(trials.length)
             timeline.push({timeline: procedures_feedback[trials.shift().type]});
         timeline.push(blockBreak);
-        if (doInstruct == true && b == 0)
-        {    
-            for (let n = 12;n<17;n++)
-            {
-                let file = '<img width="1000" height="700" src="./instructions/Slide' + (n+1).toString() + '.jpeg"></img>';
-                timeline.push({
-                    type: 'instructions',
-                    pages: [
-                        file
-                    ],
-                    show_clickable_nav: true,
-                    on_load: ()=>gov.drawProgressBar(),
-                    on_finish: (trial)=>{
-                        gov.fullscreenMode();
-                        gov.storeMiscTrialData(trial);
-                    }
-                });
-            }
-        }
     }
 
     // practice with advisor
@@ -930,6 +926,22 @@
     // real experiment
     if (blk4ForcedTrials == true)
     {
+        for (let n = 18;n<22;n++)
+        {
+            let file = '<img width="1000" height="700" src="./instructions/Slide' + (n+1).toString() + '.jpeg"></img>';
+            timeline.push({
+                type: 'instructions',
+                pages: [
+                    file
+                ],
+                show_clickable_nav: true,
+                on_load: ()=>gov.drawProgressBar(),
+                on_finish: (trial)=>{
+                    gov.fullscreenMode();
+                    gov.storeMiscTrialData(trial);
+                }
+            });
+        }
         for (let a=0; a<gov.advisorLists.length; a++) {
             
             let trials = utils.getMatches(forcedblk4Trials, function(trial) {
@@ -949,6 +961,23 @@
             //     timeline.pop();
             // }
 
+        }
+
+        for (let n = 22;n<24;n++)
+        {
+            let file = '<img width="1000" height="700" src="./instructions/Slide' + (n+1).toString() + '.jpeg"></img>';
+            timeline.push({
+                type: 'instructions',
+                pages: [
+                    file
+                ],
+                show_clickable_nav: true,
+                on_load: ()=>gov.drawProgressBar(),
+                on_finish: (trial)=>{
+                    gov.fullscreenMode();
+                    gov.storeMiscTrialData(trial);
+                }
+            });
         }
 
     }
@@ -973,6 +1002,26 @@
         }
         else
         {
+            if (doInstruct == true && blk4ForcedTrials == false)
+            {    
+                for (let n = 12;n<17;n++)
+                {
+                    let file = '<img width="1000" height="700" src="./instructions/Slide' + (n+1).toString() + '.jpeg"></img>';
+                    timeline.push({
+                        type: 'instructions',
+                        pages: [
+                            file
+                        ],
+                        show_clickable_nav: true,
+                        on_load: ()=>gov.drawProgressBar(),
+                        on_finish: (trial)=>{
+                            gov.fullscreenMode();
+                            gov.storeMiscTrialData(trial);
+                        }
+                    });
+                }
+            }
+
             for (let b=0; b<gov.blockStructure.length; b++) {
                 // find trials in this block
                 let trials = utils.getMatches(gov.trials, function(trial) {

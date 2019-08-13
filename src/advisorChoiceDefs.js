@@ -680,7 +680,7 @@ class DotTask extends Governor {
             type: 'text'
         });
         questions.push({
-            prompt: 'Please provide age as a number between 18 and 40',
+            prompt: 'Please provide age',
             mandatory: true,
             type: 'text'
         });
@@ -733,7 +733,7 @@ class DotTask extends Governor {
                     }
                     else
                     {
-                        if (parseInt(form.querySelector('#demoCommentAnswer1').value) < 18 || parseInt(form.querySelector('#demoCommentAnswer1').value) > 40)
+                        if (parseInt(form.querySelector('#demoCommentAnswer1').value) < 18)
                         {
                             return false;
                         }
@@ -1029,7 +1029,8 @@ class DotTask extends Governor {
         // reset background colour
         if(clearScreen === true) {
             document.querySelector('body').style.backgroundColor = '';
-            document.body.innerHTML = "<div id='content'></div>";
+            //document.body.innerHTML = "<div id='content'></div>";
+            document.body.innerHTML = '<img width="1000" height="700" src="./instructions/Slide18.jpeg" style="transform: translate(50%, 20%)"></img>';
         }
         //this.feedback(this, (saveData && this.completionURL !== ''));
     }

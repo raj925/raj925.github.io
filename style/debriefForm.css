@@ -19,6 +19,8 @@ textarea.debrief {
     font-size: 1em;
     line-height: 1.5em;
     border: 1px solid transparent;
+    position: relative;
+    transform: translate(-55%, 0%);
 }
 .debrief.labels, .debrief .radios {
     display: inline-flex;
