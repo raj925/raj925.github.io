@@ -733,7 +733,7 @@ class DotTask extends Governor {
                     }
                     else
                     {
-                        if (parseInt(form.querySelector('#demoCommentAnswer1').value) < 18)
+                        if (parseInt(form.querySelector('#demoCommentAnswer1').value) < 18 || parseInt(form.querySelector('#demoCommentAnswer1').value) > 100)
                         {
                             return false;
                         }
