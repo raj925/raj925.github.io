@@ -666,10 +666,6 @@ class DotTask extends Governor {
         let div = document.querySelector('.jspsych-content').appendChild(document.createElement('div'));
         div.id = 'demoContainer';
         div.className = 'demo';
-        //let header = div.appendChild(document.createElement('h1'));
-        //header.id = 'demoTitle';
-        //div.className = 'demo';
-        //header.innerText = 'first...';
         let form = div.appendChild(document.createElement('form'));
         form.id = 'demoForm';
         form.className = 'demo';
@@ -689,7 +685,9 @@ class DotTask extends Governor {
             comment.id = 'demoCommentContainer'+i;
             comment.className = 'demo demo-container';
             if(i > 0)
+            {  
                 comment.classList.add('hidden');
+            }
             let commentQ = comment.appendChild(document.createElement('div'));
             commentQ.id = 'demoCommentQuestion'+i;
             commentQ.className = 'demo question';
@@ -1011,6 +1009,143 @@ class DotTask extends Governor {
     debriefFormSubmit(form) {
         document.querySelector('body').innerHTML = "";
         this.endExperiment();
+    }
+
+    /**
+    *
+    */
+    drawRadioQuestionnaire(qs,options,name)
+    {
+        let owner = this;
+        // Create form
+        let div = document.querySelector('.jspsych-content').appendChild(document.createElement('div'));
+        div.id = 'questionContainer';
+        div.className = name;
+        let header = div.appendChild(document.createElement('h1'));
+        header.id = name + 'Title';
+        div.className = name;
+        let form = div.appendChild(document.createElement('form'));
+        form.id = name + 'Form';
+        form.className = 'name';
+
+        let numOfQuestions = qs.length;
+        let numOfOptions = options.length;
+
+        let questions = [];
+
+        // Go through questions list and append to form each 
+        // With options laid out in the function argument
+
+        for (let i = 0;i<numOfQuestions;i++)
+        {
+            questions.push({
+                prompt: qs[i],
+                mandatory: true,
+                type: 'scale',
+                labels: options,
+                nOptions: numOfOptions
+            });
+
+        }
+
+        for(let i = 0; i < questions.length; i++) 
+        {
+            let comment = form.appendChild(document.createElement('div'));
+            comment.id = 'questionCommentContainer'+i;
+            comment.className = 'questionContainer';
+            if(i > 0)
+            {
+                comment.classList.add('hidden');
+            }
+            let commentQ = comment.appendChild(document.createElement('div'));
+            commentQ.id = 'questionCommentQuestion'+i;
+            commentQ.className = 'question question';
+            commentQ.innerHTML = "<strong>Q"+(i+1)+"/"+(questions.length) + ":  " + questions[i].prompt + "</strong> ";
+            let commentA = comment.appendChild(document.createElement('div'));
+
+            let radios = commentA.appendChild(document.createElement('div'));
+            radios.className = 'radios';
+            radios.id = 'options';
+            radios.style = 'margin-top: 10px';
+            for(let o = 0; o < questions[i].nOptions; o++) {
+                let label = radios.appendChild(document.createElement('label'));
+                let labelid = "label-"+i+"-"+o;
+                label.id = labelid;
+                label.style = "display:block; margin:5px";
+                let choice = document.getElementById(labelid);
+                choice.innerHTML = options[o];
+
+                let radio = choice.appendChild(document.createElement('input'));
+                radio.type = 'radio';
+                radio.value = (o + 1).toString();
+                radio.name = commentQ.id;
+                radio.style = "justify-self: center";
+            } 
+
+            let ok = comment.appendChild(document.createElement('button'));
+            ok.innerText = i === questions.length - 1? 'submit' : 'next';
+            ok.className = 'question jspsych-btn';
+
+            let checkResponse;
+            let saveResponse;
+
+            checkResponse = function(form) {
+            let div = form.querySelector('.questionContainer:not(.hidden) .radios');
+            let ok = false;
+            let radios = div.querySelectorAll('input[type="radio"]');
+            radios.forEach((r)=>{if(r.checked) ok = true});
+            if(!ok)
+                form.querySelector('.questionContainer:not(.hidden)').classList.add('bad');
+            else
+                form.querySelector('.questionContainer:not(.hidden)').classList.remove('bad');
+            return ok;
+            };
+
+            saveResponse = function(form) {
+                let q = questions[i];
+                form.querySelectorAll('.questionContainer:not(.hidden) input[type="radio"]').forEach(
+                    (r)=>{ if(r.checked) q.answer = r.value}
+                );
+                gov.radioResponses.push(q);
+            };       
+
+           if(!questions[i].mandatory)
+           {
+                checkResponse = ()=>true;
+           }
+
+            if(i === questions.length - 1)
+                ok.onclick = function (e) {
+                    e.preventDefault();
+                    if(!checkResponse(this.form))
+                        return false;
+                    saveResponse(this.form);
+                    owner.radioFormSubmit(form,qs,numOfQuestions);
+                };
+            else
+                ok.onclick = function(e) {
+                    e.preventDefault();
+                    if(!checkResponse(this.form))
+                        return false;
+                    saveResponse(this.form);
+                    let div = this.form.querySelector('.questionContainer:not(.hidden)');
+                    div.classList.add('hidden');
+                    div.nextSibling.classList.remove('hidden');
+                    }
+        }
+
+        gov.radioResponses = [];
+    }
+
+    radioFormSubmit(form,qs,numOfQuestions) {
+        radioData = [];
+        for (let q = 0;q<numOfQuestions;q++)
+        {
+            let questionQuery = '#questionCommentQuestion' + q;
+            radioData.push({question: qs[q]},{answer: form.querySelector(questionQuery).value});
+        }
+        this.radio = radioData;
+        jsPsych.finishTrial(this.radio);
     }
 
     feedback(data, includePayment = false) {

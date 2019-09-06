@@ -31,6 +31,7 @@
     <script src="../src/forcedData.js"></script>
     <script src="../src/blk4Data.js"></script>
     <script src="../src/whereDots.js"></script>
+    <script src="../src/questions.js"></script>
 
     <link rel="stylesheet" href="../style/advisorChoice.css"/>
     <link rel="stylesheet" href="https://mjaquiery.github.io/jsPsych/css/jspsych.css"/>
@@ -63,7 +64,7 @@
 
     const betaTest = true;  // If true, uses a shortened number of trials for quicker testing purposes
     const doInstruct = true; // If true, shows instructions.
-    const doQuestionnaire = false; // If true, includes questionnaires. 
+    const doQuestionnaire = true; // If true, includes questionnaires. 
     const demoQuestions = true; // If true, asks participants for age and gender. Stored in a private folder.
 
     const numOfBetaTrialsPerBlock = 2; // For beta testing, this is the number of trials in each block.
@@ -830,6 +831,17 @@
         on_finish: (trial)=>gov.genTrustQuestionnaireResponse(trial)
     };
 
+    const radQs = {
+        type: 'instructions',
+        pages: [''],
+        show_clickable_nav: false,
+        on_load: ()=>gov.drawRadioQuestionnaire(["Does this work?","How about this?"],["Yes", "Maybe", "Not Quite", "No"],"test"),
+        on_finish: (trial)=>{
+            gov.fullscreenMode();
+            gov.storeMiscTrialData(trial);
+        }
+    };
+
 
     const procedures_feedback = {
         //feedbackDisplay removed for now from arrays.
@@ -860,6 +872,19 @@
     if (demoQuestions == true)
     {
         timeline.push(demo);
+        for (let x = 0;x<Qs.length;x++)
+        {
+            timeline.push({
+                type: 'instructions',
+                pages: [''],
+                show_clickable_nav: false,
+                on_load: ()=>gov.drawRadioQuestionnaire(Qs[x],As[x],names[x]),
+                on_finish: (trial)=>{
+                    gov.fullscreenMode();
+                    gov.storeMiscTrialData(trial);
+                }
+            });
+        }
     }
 
     if (doInstruct == true)
