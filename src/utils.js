@@ -287,6 +287,10 @@ function randPerm(n) {
     // We also need to track which one we are using to get the corresponding
     // advisor confidence and answer.
     return result
-};   
+}   
 
-export {shuffle, shuffleShoe, sumList, mean, stDev, max, min, randPerm, copyArray, orderArray, copyObject, getMatches, applyClassToChildren, round, getSequence}
+function genRandInt(min, max) {
+  return Math.floor(min + Math.random()*(max + 1 - min));
+}
+
+export {shuffle, shuffleShoe, sumList, mean, stDev, max, min, randPerm, copyArray, orderArray, copyObject, getMatches, applyClassToChildren, round, getSequence, genRandInt}

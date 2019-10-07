@@ -32,6 +32,7 @@
     <script src="../src/blk4Data.js"></script>
     <script src="../src/whereDots.js"></script>
     <script src="../src/questions.js"></script>
+    <script src="../src/mbaVars.js"></script>
 
     <link rel="stylesheet" href="../style/advisorChoice.css"/>
     <link rel="stylesheet" href="https://mjaquiery.github.io/jsPsych/css/jspsych.css"/>
@@ -63,9 +64,10 @@
     // (If no comments, that variable is not functional yet so LEAVE IT AS IS!)
 
     const betaTest = true;  // If true, uses a shortened number of trials for quicker testing purposes
-    const doInstruct = true; // If true, shows instructions.
-    const doQuestionnaire = true; // If true, includes questionnaires. 
-    const demoQuestions = true; // If true, asks participants for age and gender. Stored in a private folder.
+    const doInstruct = false; // If true, shows instructions.
+    const doQuestionnaire = false; // If true, includes questionnaires. 
+    const demoQuestions = false; // If true, asks participants for age and gender. Stored in a private folder.
+    const advisorEstimateTask = false; // If true, will run a Dietvorst-like advisor estimate task.
 
     const numOfBetaTrialsPerBlock = 2; // For beta testing, this is the number of trials in each block.
 
@@ -872,6 +874,10 @@
     if (demoQuestions == true)
     {
         timeline.push(demo);
+    }
+
+    if (doQuestionnaire == true)
+    {
         for (let x = 0;x<Qs.length;x++)
         {
             timeline.push({
@@ -885,6 +891,21 @@
                 }
             });
         }
+
+    }
+
+    if (advisorEstimateTask == true)
+    {
+        timeline.push({
+                type: 'instructions',
+                pages: [''],
+                show_clickable_nav: false,
+                on_load: ()=>gov.drawAdvisorEstimateTask(mbaVars),
+                on_finish: (trial)=>{
+                    gov.fullscreenMode();
+                    gov.storeMiscTrialData(trial);
+                }
+            });
     }
 
     if (doInstruct == true)
@@ -945,6 +966,85 @@
             while(trials.length)
                 timeline.push({timeline: procedures_feedback[trials.shift().type]});
             timeline.push(blockBreak);
+
+            // timeline.push({
+            //     type: 'instructions',
+            //     pages: [''],
+            //     show_clickable_nav: false,
+            //     on_load: ()=>gov.workingMemoryTaskStim(),
+            //     on_finish: (trial)=>{
+            //         gov.fullscreenMode();
+            //         gov.storeMiscTrialData(trial);
+            //     }
+            // });
+
+            // if (beepIfIncorrect == true)
+            // {
+            //     timeline.push({
+            //         type: 'instructions',
+            //         pages: [''],
+            //         show_clickable_nav: false,
+            //         on_load: ()=>gov.workingMemoryTaskRecall(1,incorrectAudioSrc),
+            //         on_finish: (trial)=>{
+            //             gov.fullscreenMode();
+            //             gov.storeMiscTrialData(trial);
+            //         }
+            //     });
+            // }
+
+            // else
+            // {
+            //     timeline.push({
+            //         type: 'instructions',
+            //         pages: [''],
+            //         show_clickable_nav: false,
+            //         on_load: ()=>gov.workingMemoryTaskRecall(1),
+            //         on_finish: (trial)=>{
+            //             gov.fullscreenMode();
+            //             gov.storeMiscTrialData(trial);
+            //         }
+            //     });
+            // }
+                
+            // timeline.push({
+            //     type: 'instructions',
+            //     pages: [''],
+            //     show_clickable_nav: false,
+            //     on_load: ()=>gov.maintainMemoryTaskStim(5),
+            //     on_finish: (trial)=>{
+            //         gov.fullscreenMode();
+            //         gov.storeMiscTrialData(trial);
+            //     }
+            // });
+
+            // if (beepIfIncorrect == true)
+            // {
+            //     timeline.push({
+            //         type: 'instructions',
+            //         pages: [''],
+            //         show_clickable_nav: false,
+            //         on_load: ()=>gov.maintainMemoryTaskRecall(incorrectAudioSrc),
+            //         on_finish: (trial)=>{
+            //             gov.fullscreenMode();
+            //             gov.storeMiscTrialData(trial);
+            //         }
+            //     });
+            // }
+
+            // else
+            // {
+            //     timeline.push({
+            //         type: 'instructions',
+            //         pages: [''],
+            //         show_clickable_nav: false,
+            //         on_load: ()=>gov.maintainMemoryTaskRecall(),
+            //         on_finish: (trial)=>{
+            //             gov.fullscreenMode();
+            //             gov.storeMiscTrialData(trial);
+            //         }
+            //     });
+            // }
+
         }
     }
 
@@ -953,19 +1053,22 @@
     {
         for (let n = 18;n<22;n++)
         {
-            let file = '<img width="1000" height="700" src="./instructions/Slide' + (n+1).toString() + '.jpeg"></img>';
-            timeline.push({
-                type: 'instructions',
-                pages: [
-                    file
-                ],
-                show_clickable_nav: true,
-                on_load: ()=>gov.drawProgressBar(),
-                on_finish: (trial)=>{
-                    gov.fullscreenMode();
-                    gov.storeMiscTrialData(trial);
-                }
-            });
+            if (doInstruct == true)
+            {
+                let file = '<img width="1000" height="700" src="./instructions/Slide' + (n+1).toString() + '.jpeg"></img>';
+                timeline.push({
+                    type: 'instructions',
+                    pages: [
+                        file
+                    ],
+                    show_clickable_nav: true,
+                    on_load: ()=>gov.drawProgressBar(),
+                    on_finish: (trial)=>{
+                        gov.fullscreenMode();
+                        gov.storeMiscTrialData(trial);
+                    }
+                });
+            }
         }
         for (let a=0; a<gov.advisorLists.length; a++) {
             
@@ -990,19 +1093,22 @@
 
         for (let n = 22;n<24;n++)
         {
-            let file = '<img width="1000" height="700" src="./instructions/Slide' + (n+1).toString() + '.jpeg"></img>';
-            timeline.push({
-                type: 'instructions',
-                pages: [
-                    file
-                ],
-                show_clickable_nav: true,
-                on_load: ()=>gov.drawProgressBar(),
-                on_finish: (trial)=>{
-                    gov.fullscreenMode();
-                    gov.storeMiscTrialData(trial);
-                }
-            });
+            if (doInstruct == true)
+            {
+                let file = '<img width="1000" height="700" src="./instructions/Slide' + (n+1).toString() + '.jpeg"></img>';
+                timeline.push({
+                    type: 'instructions',
+                    pages: [
+                        file
+                    ],
+                    show_clickable_nav: true,
+                    on_load: ()=>gov.drawProgressBar(),
+                    on_finish: (trial)=>{
+                        gov.fullscreenMode();
+                        gov.storeMiscTrialData(trial);
+                    }
+                });
+            }
         }
 
     }

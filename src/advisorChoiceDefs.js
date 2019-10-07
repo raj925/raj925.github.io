@@ -95,6 +95,8 @@ class DotTask extends Governor {
         this.stimulusDuration = typeof args.stimulusDuration === 'undefined'? null : args.stimulusDuration;
         this.feedbackDuration = typeof args.feedbackDuration === 'undefined'? null : args.feedbackDuration;
         this.numOfTrials = utils.sumList(this.blockStructure) + utils.sumList(this.practiceBlockStructure) + utils.sumList(this.blk4Structure);
+        this.workingMemoryStack = [];
+        this.maintainMemoryString = "";
     }
 
     /**
@@ -697,6 +699,16 @@ class DotTask extends Governor {
             commentA.id = 'demoCommentAnswer'+i;
             commentA.className = 'demo answer';
 
+            if (i ==0)
+            {
+                commentA.placeholder = 'Enter your gender here'
+            }
+
+            else
+            {
+                commentA.placeholder = 'Enter your age here'
+            }
+
             let ok = comment.appendChild(document.createElement('button'));
             ok.innerText = i === questions.length - 1? 'submit' : 'next';
             ok.className = 'demo jspsych-btn';
@@ -1012,7 +1024,191 @@ class DotTask extends Governor {
     }
 
     /**
-    *
+    * Create an estimation task with help from an advisor.
+    * @param {object} trials - trial data for running the advisor estimation task.
+    * trials should be of the format as follows:
+    * practice flag, array of estimation criteria, advisor estimate}
+    */
+    drawAdvisorEstimateTask(trials)
+    {
+        let estimateNumber = 1;
+        let owner = this;
+        // Create form
+        let div = document.querySelector('.jspsych-content').appendChild(document.createElement('div'));
+        div.id = 'estimateContainer';
+        div.className = name;
+        let header = div.appendChild(document.createElement('h1'));
+        header.id = name + 'Title';
+        div.className = name;
+        let form = div.appendChild(document.createElement('form'));
+        form.id = name + 'Form';
+        form.className = 'name';
+
+        // Show factors, allow estimate
+        // Show advice, allow for resestimate
+        // Show true answer
+        // Block feedback?
+
+        let numOfTrials = trials.length;
+        let questions = [];
+
+        for (let i = 0;i<numOfTrials;i++)
+        {
+
+            questions.push({
+                prompt: "Provide an estimate of this student's percentile.",
+                mandatory: true,
+                type: 'text'
+            });
+        }
+
+        for(let i = 0; i < questions.length; i++) 
+        {
+
+            let comment = form.appendChild(document.createElement('div'));
+            comment.id = 'estimateCommentContainer'+i;
+            comment.className = 'estimateContainer';
+            if(i > 0)
+            {
+                comment.classList.add('hidden');
+            }
+            let commentQ = comment.appendChild(document.createElement('div'));
+            commentQ.id = 'estimateCommentQuestion'+i;
+            commentQ.className = 'estimate question';
+            let innerhtml = '<table style="margin-bottom: 15em; position: absolute; left: 48%; margin-right: 50%; transform: translate(-50%, -120%);" >';
+
+            for (let r = 0;r<trials[i].factorNames.length;r++)
+            {
+                innerhtml = innerhtml + '<tr><th style="padding-right: 3em">' + trials[i].factorNames[r] + '</th><th style="padding-left: 3em">' + trials[i].factorValues[r] + '</th></tr>';
+            }
+
+
+            innerhtml = innerhtml + '</table>';
+
+            commentQ.innerHTML = innerhtml;
+            let commentA = comment.appendChild(document.createElement('textarea'));
+
+            commentA.id = 'estimateCommentAnswer'+estimateNumber+i;
+            commentA.className = 'estimate answer';
+
+            commentA.placeholder = 'Enter your estimate here';
+
+            let ok = comment.appendChild(document.createElement('button'));
+            ok.innerText = i === questions.length - 1? 'submit' : 'next';
+            ok.className = 'question jspsych-btn';
+
+            let checkResponse;
+            let saveResponse;
+
+            checkResponse = function(form) {
+
+            let div = form.querySelector('.estimateContainer:not(.hidden)');
+            let ok = div.querySelector('textarea').value !== "";
+
+            if(!ok)
+                form.querySelector('.estimateContainer:not(.hidden)').classList.add('bad');
+            else
+                form.querySelector('.estimateContainer:not(.hidden)').classList.remove('bad');
+            return ok;
+            };
+
+            saveResponse = function(form) {
+                let q = questions[i];
+                form.querySelectorAll('.estimateContainer:not(.hidden)').forEach(
+                    (r)=>{ if(r.checked) q.answer = r.value}
+                );
+                gov.estimateResponses.push(q);
+            };       
+
+           if(!questions[i].mandatory)
+           {
+                checkResponse = ()=>true;
+           }
+
+            if(i === questions.length - 1)
+                ok.onclick = function (e) {
+                    e.preventDefault();
+                    if(!checkResponse(this.form))
+                        return false;
+                    let check = '#estimateCommentAnswer'+estimateNumber+i;
+                    if (isNaN(parseInt(form.querySelector(check).value)))
+                    {
+                        return false;
+                    }
+                    if (parseInt(form.querySelector(check).value) > 100 || parseInt(form.querySelector(check).value) < 1)
+                    {
+                        return false;
+                    }
+                    saveResponse(this.form);
+                    owner.estimateFormSubmit(form,qs,numOfQuestions);
+                };
+            else
+                ok.onclick = function(e) {
+                    e.preventDefault();
+                    if(!checkResponse(this.form))
+                        return false;
+                    let check = '#estimateCommentAnswer'+estimateNumber+i;
+                    if (isNaN(parseInt(form.querySelector(check).value)))
+                    {
+                        return false;
+                    }
+                    if (parseInt(form.querySelector(check).value) > 100 || parseInt(form.querySelector(check).value) < 1)
+                    {
+                        return false;
+                    }
+                    saveResponse(this.form);
+                    if (estimateNumber == 1)
+                    {
+                        innerhtml = innerhtml + "<h2>Advisor Estimate: " + trials[i].advEstimate + "</h2>";
+                        innerhtml = innerhtml + "<h2>Your Previous Estimate: " + form.querySelector('#estimateCommentAnswer1' + i).value + "</h2>";
+
+                        commentQ.innerHTML = innerhtml;
+                        commentA.classList.add('hidden');
+                        let commentB = comment.appendChild(document.createElement('textarea'));
+                        estimateNumber = 2;
+                        commentB.id = 'estimateCommentAnswer'+estimateNumber+i;
+                        commentB.placeholder = 'Make your final estimate';
+
+                    }
+                    else
+                    {
+                        let div = this.form.querySelector('.estimateContainer:not(.hidden)');
+                        div.classList.add('hidden');
+                        div.nextSibling.classList.remove('hidden');
+                        estimateNumber = 1;
+                    }
+
+                }
+        }
+
+        gov.estimateResponses = [];
+
+    }
+
+
+    /**
+     * Submit the form of answers to the estimate task trials.
+     *
+     */
+    estimateFormSubmit(form) {
+        estimateData = [];
+        for (let q = 0;q<numOfQuestions;q++)
+        {
+            let questionQuery = '#estimateCommentAnswer1' + q;
+            estimateData.push({question: qs[q]},{answer: form.querySelector(questionQuery).value});
+            questionQuery = '#estimateCommentAnswer2' + q;
+            estimateData.push({question: qs[q]},{answer: form.querySelector(questionQuery).value});
+        }
+        this.estimates = estimateData;
+        jsPsych.finishTrial(this.estimates);
+    }
+
+
+    /**
+    * Draw a questionnaire with multiple choice radio buttons.
+    * @param {array} qs - array of strings for question texts
+    * @param {array} options - array of strings for choices for the questions.
+    * @param {string} name - name of the questionnaire.
     */
     drawRadioQuestionnaire(qs,options,name)
     {
@@ -1120,7 +1316,7 @@ class DotTask extends Governor {
                     if(!checkResponse(this.form))
                         return false;
                     saveResponse(this.form);
-                    owner.radioFormSubmit(form,qs,numOfQuestions);
+                    owner.estimateFormSubmit(form,qs,numOfQuestions);
                 };
             else
                 ok.onclick = function(e) {
@@ -1137,6 +1333,11 @@ class DotTask extends Governor {
         gov.radioResponses = [];
     }
 
+    /**
+     * Submit the questionnaire form
+     * Needs to be done for each questionnaire to allow for multiple
+     *
+     */
     radioFormSubmit(form,qs,numOfQuestions) {
         radioData = [];
         for (let q = 0;q<numOfQuestions;q++)
@@ -1146,6 +1347,286 @@ class DotTask extends Governor {
         }
         this.radio = radioData;
         jsPsych.finishTrial(this.radio);
+    }
+
+    /**
+    *
+    */
+    maintainMemoryTaskStim(len)
+    {
+        let alphabet = "bcdfghjklmnpqrstvwxz";
+        let nextString = "";
+        let number;
+        while (nextString.length < len)
+        {
+            number = utils.genRandInt(0,19);
+            if (nextString.includes(alphabet[number]) == false)
+            {
+                nextString = nextString + alphabet[number];
+            }
+        }
+        this.maintainMemoryString = nextString;
+        let div = document.querySelector('.jspsych-content').appendChild(document.createElement('div'));
+        div.id = 'maintainMemoryStimContainer';
+        div.innerHTML = "<h2>Please take a moment to memorise the letters below:</h2><br/><br/>"+"<h1>"+nextString+"</h1>";
+
+        let form = div.appendChild(document.createElement('form'));
+        form.id = name + 'Form';
+        form.className = 'name';
+
+        let ok = div.appendChild(document.createElement('button'));
+        ok.innerText = 'next';
+        ok.className = 'question jspsych-btn';
+
+        ok.onclick = function (e) {
+            e.preventDefault();
+            jsPsych.finishTrial();
+        };
+    }
+
+    maintainMemoryTaskRecall(audio="")
+    {
+        let owner = this;
+        let alphabet = "bcdfghjklmnpqrstvwxz";
+        let startString = this.maintainMemoryString;
+        let shownString = startString;
+        let change;
+        if (Math.random() < .5)
+        {
+            change = 0;
+        }
+        else
+        {
+            change = 1;
+            let flag = 0;
+            let charToChange = utils.genRandInt(0,4);
+            let number = utils.genRandInt(0,19);
+            if (shownString.includes(alphabet[number]) == true)
+            {
+                flag = 1;
+            }
+            while (flag == 1)
+            {
+                number = utils.genRandInt(0,19);
+                if (shownString.includes(alphabet[number]) == false)
+                {
+                    flag = 0;
+                }
+            }
+            shownString = shownString.split(shownString[charToChange])[0] + alphabet[number] + shownString.split(shownString[charToChange])[1];
+        }
+
+        let div = document.querySelector('.jspsych-content').appendChild(document.createElement('div'));
+        div.id = 'maintainMemoryRecallContainer';
+        div.innerHTML = "<h2>Are the below letters the same as you were shown before?</h2><br/><br/>"+"<h1>"+shownString+"</h1>";
+
+        let form = div.appendChild(document.createElement('form'));
+        form.id = name + 'Form';
+        form.className = 'name';
+
+        let radios = div.appendChild(document.createElement('div'));
+        radios.className = 'radios';
+        radios.id = 'options';
+        radios.style = 'margin-top: 10px';
+
+        let labelYes = radios.appendChild(document.createElement('label'));
+        labelYes.id = "label-yes";
+        labelYes.style = "display:block; margin:5px";
+        labelYes.innerHTML = "Yes";
+
+        let radioYes = labelYes.appendChild(document.createElement('input'));
+        radioYes.type = 'radio';
+        radioYes.name = "maintainMemYN";
+        radioYes.value = 0;
+        radioYes.style = "justify-self: center";
+
+        let labelNo = radios.appendChild(document.createElement('label'));
+        labelNo.id = "label-no";
+        labelNo.style = "display:block; margin:5px";
+        labelNo.innerHTML = "No";
+
+        let radioNo = labelNo.appendChild(document.createElement('input'));
+        radioNo.type = 'radio';
+        radioNo.name = "maintainMemYN";
+        radioNo.value = 1;
+        radioNo.style = "justify-self: center";
+
+        let ok = div.appendChild(document.createElement('button'));
+        ok.innerText = 'submit';
+        ok.className = 'question jspsych-btn';
+
+        let checkResponse;
+        let saveResponse;
+        let answer;
+
+        checkResponse = function(form) {
+           // let div = form.querySelector('.radios');
+            let ok = false;
+            let rads = div.querySelectorAll('input[type="radio"]');
+            rads.forEach((r)=>{if(r.checked) ok = true});
+            return ok;
+        };
+
+        saveResponse = function(form) {
+            div.querySelectorAll('input[type="radio"]').forEach(
+                (r)=>{ if(r.checked) answer = r.value}
+            );
+            gov.maintainMems.push(startString,shownString,answer);
+        };       
+
+        ok.onclick = function (e) {
+                e.preventDefault();
+                if(!checkResponse(this.form))
+                    return false;
+                saveResponse(this.form);
+                if (audio.length > 0 && parseInt(answer) !== change)
+                {
+                    var tone = new Audio(audio);
+                    tone.play();
+                }
+                owner.maintainMemFormSubmit(startString,shownString,answer);
+                if (document.querySelector('#maintainMemoryRecallContainer') !== null)
+                {
+                    document.querySelector('#maintainMemoryRecallContainer').innerHTML = "";
+                }
+                
+        };
+
+        gov.maintainMems = [];
+
+    }
+
+    maintainMemFormSubmit(starting,shown,answer) {
+        this.maintainMem = [
+            {
+                starting: starting,
+                shown: shown,
+                answer: answer
+            }
+        ];
+        jsPsych.finishTrial(this.maintainMem);
+    }
+
+
+    workingMemoryTaskStim()
+    {
+        let alphabet = "bcdfghjklmnpqrstvwxz";
+        let number = utils.genRandInt(0,19);
+        let currentLetterStack = this.workingMemoryStack;
+        let flag = 0;
+
+        if (currentLetterStack.includes(alphabet[number]) == true)
+        {
+            flag = 1;
+        }
+
+        while (flag == 1)
+        {
+            number = utils.genRandInt(0,19);
+            if (currentLetterStack.includes(alphabet[number]) == false)
+            {
+                flag = 0;
+            }
+        }
+
+        currentLetterStack.unshift(alphabet[number]);
+        this.workingMemoryStack = currentLetterStack;
+
+        let div = document.querySelector('.jspsych-content').appendChild(document.createElement('div'));
+        div.id = 'workingMemoryStimContainer';
+        div.innerHTML = "<h2>Please take a moment to memorise the letter below:</h2><br/><br/>"+"<h1>"+alphabet[number]+"</h1>";
+
+        let form = div.appendChild(document.createElement('form'));
+        form.id = name + 'Form';
+        form.className = 'name';
+
+        let ok = div.appendChild(document.createElement('button'));
+        ok.innerText = 'next';
+        ok.className = 'question jspsych-btn';
+
+
+        ok.onclick = function (e) {
+            e.preventDefault();
+            jsPsych.finishTrial();
+        };
+
+    }
+
+    workingMemoryTaskRecall(N,audio="")
+    {
+        let owner = this;
+        let currentLetterStack = this.workingMemoryStack;
+        let letter = currentLetterStack[N-1];
+        let div = document.querySelector('.jspsych-content').appendChild(document.createElement('div'));
+        div.id = 'workingMemoryStimContainer';
+        div.innerHTML = "<h2>Which letter was shown "+N+" times ago?";
+
+        let form = div.appendChild(document.createElement('form'));
+        form.id = name + 'Form';
+        form.className = 'name';
+
+        let answer = div.appendChild(document.createElement('textarea'));
+        answer.id = 'workingMemoryAnswer';
+
+        let ok = div.appendChild(document.createElement('button'));
+        ok.innerText = 'next';
+        ok.className = 'question jspsych-btn';
+
+        let checkResponse;
+        let saveResponse;
+        let answered;
+
+        checkResponse = function(form) {
+            let ok = div.querySelector('textarea').value !== "";
+            answered = div.querySelector('textarea').value;
+            return ok;
+        };
+            
+        saveResponse = function(form) {
+            gov.workingMems.push(letter,N,answered);
+        };
+
+        ok.onclick = function (e) {
+            e.preventDefault();
+            if(!checkResponse(this.form))
+                return false;
+            let alphabet = "bcdfghjklmnpqrstvwxz";
+            let alphabetFull = "abcdefghijklmnopqrstuvwxyz";
+            if (answered.length > 1)
+            {
+                return false;
+            }
+            else if (alphabetFull.includes(answered) == false)
+            {
+                return false;
+            }
+            saveResponse(this.form);
+            if (audio.length > 0 && answered !== letter)
+            {
+                var tone = new Audio(audio);
+                tone.play();
+            }
+            owner.workingMemFormSubmit(letter,N,answer);
+            if (document.querySelector('#maintainMemoryRecallContainer') !== null)
+            {
+                document.querySelector('#maintainMemoryRecallContainer').innerHTML = "";
+            }    
+        };
+
+        gov.workingMems = [];
+
+    }
+
+
+    workingMemFormSubmit(letter,N,answer) {
+        this.workingMem = [
+            {
+                letter: letter,
+                N: N,
+                answer: answer
+            }
+        ];
+        jsPsych.finishTrial(this.workingMem);
     }
 
     feedback(data, includePayment = false) {
