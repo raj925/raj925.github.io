@@ -1214,7 +1214,7 @@
     else {  
             jsPsych.init({
                 timeline: timeline,
-                on_finish:{
+                on_finish: (trial)=>{
                     ()=>gov.drawDebriefForm();
                 }
             });
