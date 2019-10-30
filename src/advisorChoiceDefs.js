@@ -1555,18 +1555,73 @@ class DotTask extends Governor {
     workingMemoryTaskRecall(N,audio="")
     {
         let owner = this;
+        let alphabet = "bcdfghjklmnpqrstvwxz";
         let currentLetterStack = this.workingMemoryStack;
         let letter = currentLetterStack[N-1];
         let div = document.querySelector('.jspsych-content').appendChild(document.createElement('div'));
         div.id = 'workingMemoryStimContainer';
-        div.innerHTML = "<h2>Which letter was shown "+N+" times ago?";
 
         let form = div.appendChild(document.createElement('form'));
         form.id = name + 'Form';
         form.className = 'name';
 
-        let answer = div.appendChild(document.createElement('textarea'));
-        answer.id = 'workingMemoryAnswer';
+        let change;
+        let shownLetter;
+
+        if (Math.random() < .5)
+        {
+            change = 0;
+            shownLetter = letter;
+        }
+
+        else
+        {
+            change = 1;
+            let flag = 0;
+            let number = utils.genRandInt(0,19);
+            if (letter == alphabet[number] == true)
+            {
+                flag = 1;
+            }
+            while (flag == 1)
+            {
+                number = utils.genRandInt(0,19);
+                if (letter == alphabet[number] == false)
+                {
+                    flag = 0;
+                }
+            }
+            shownLetter = alphabet[number];
+        }
+
+        div.innerHTML = "<h2>Is this the same letter that was shown "+N+" times ago?<br/><br/>"+"<h1>"+shownLetter+"</h1>";
+
+        let radios = div.appendChild(document.createElement('div'));
+        radios.className = 'radios';
+        radios.id = 'options';
+        radios.style = 'margin-top: 10px';
+
+        let labelYes = radios.appendChild(document.createElement('label'));
+        labelYes.id = "label-yes";
+        labelYes.style = "display:block; margin:5px";
+        labelYes.innerHTML = "Yes";
+
+        let radioYes = labelYes.appendChild(document.createElement('input'));
+        radioYes.type = 'radio';
+        radioYes.name = "maintainMemYN";
+        radioYes.value = 0;
+        radioYes.style = "justify-self: center";
+
+        let labelNo = radios.appendChild(document.createElement('label'));
+        labelNo.id = "label-no";
+        labelNo.style = "display:block; margin:5px";
+        labelNo.innerHTML = "No";
+
+        let radioNo = labelNo.appendChild(document.createElement('input'));
+        radioNo.type = 'radio';
+        radioNo.name = "maintainMemYN";
+        radioNo.value = 1;
+        radioNo.style = "justify-self: center";
 
         let ok = div.appendChild(document.createElement('button'));
         ok.innerText = 'next';
@@ -1574,43 +1629,34 @@ class DotTask extends Governor {
 
         let checkResponse;
         let saveResponse;
-        let answered;
+        let answer;
 
         checkResponse = function(form) {
-            let ok = div.querySelector('textarea').value !== "";
-            answered = div.querySelector('textarea').value;
+            div.querySelectorAll('input[type="radio"]').forEach(
+                (r)=>{ if(r.checked) answer = r.value}
+            );
             return ok;
         };
             
         saveResponse = function(form) {
-            gov.workingMems.push(letter,N,answered);
+            gov.workingMems.push(letter,N,answer);
         };
 
         ok.onclick = function (e) {
             e.preventDefault();
             if(!checkResponse(this.form))
                 return false;
-            let alphabet = "bcdfghjklmnpqrstvwxz";
-            let alphabetFull = "abcdefghijklmnopqrstuvwxyz";
-            if (answered.length > 1)
-            {
-                return false;
-            }
-            else if (alphabetFull.includes(answered) == false)
-            {
-                return false;
-            }
             saveResponse(this.form);
-            if (audio.length > 0 && answered !== letter)
+            if (audio.length > 0 && parseInt(answer) !== change)
             {
                 var tone = new Audio(audio);
                 tone.play();
             }
-            owner.workingMemFormSubmit(letter,N,answer);
-            if (document.querySelector('#maintainMemoryRecallContainer') !== null)
+            owner.workingMemFormSubmit(letter,shownLetter,N,answer);
+            if (document.querySelector('workingMemoryStimContainer') !== null)
             {
-                document.querySelector('#maintainMemoryRecallContainer').innerHTML = "";
-            }    
+                document.querySelector('workingMemoryStimContainer').innerHTML = "";
+            }
         };
 
         gov.workingMems = [];
@@ -1618,10 +1664,11 @@ class DotTask extends Governor {
     }
 
 
-    workingMemFormSubmit(letter,N,answer) {
+    workingMemFormSubmit(letter,shownLetter,N,answer) {
         this.workingMem = [
             {
                 letter: letter,
+                shownLetter: shownLetter,
                 N: N,
                 answer: answer
             }

@@ -64,14 +64,17 @@
     // (If no comments, that variable is not functional yet so LEAVE IT AS IS!)
 
     const betaTest = true;  // If true, uses a shortened number of trials for quicker testing purposes
-    const doInstruct = false; // If true, shows instructions.
+    const doInstruct = true; // If true, shows instructions.
     const doQuestionnaire = false; // If true, includes questionnaires. 
-    const demoQuestions = false; // If true, asks participants for age and gender. Stored in a private folder.
+    const demoQuestions = true; // If true, asks participants for age and gender. Stored in a private folder.
     const advisorEstimateTask = false; // If true, will run a Dietvorst-like advisor estimate task.
+
+    const memoryMaintenanceTask = false;
+    const workingMemoryTask = false;
 
     const numOfBetaTrialsPerBlock = 2; // For beta testing, this is the number of trials in each block.
 
-    const blk4ForcedTrials = true; // If true, add an extra block after practice/staircasing of just forced trials.
+    const blk4ForcedTrials = false; // If true, add an extra block after practice/staircasing of just forced trials.
 
     const numOfPracticeBlocks = 3; // How many staircasing/practice blocks do you want ppts to do?
     const numOfExperimentalBlocks = 6; // How many regular blocks of trials do you want ppts to do?
@@ -102,7 +105,9 @@
     const advisor2Src = 'assets/image/comp.jpg'; // Filepath for advisor 2 image
     const incorrectAudioSrc = 'assets/audio/beep.mp3'; // Filepath of sound played when incorrect
 
-    // Possible future extensions: Need for Congition/Closure, See Stim Again, Difference Advisors with/out confidence
+    const endRedirectURL = 'https://app.prolific.co/submissions/complete?cc=595E8D06'; //What URL to redirect to after the experiment, usually a Prolific completion URL.
+
+    // Possible future extensions: See Stim Again, Difference Advisors with/out confidence
 
     ///////////////////////////////////////////////////////////////////
     ///////////////////////////////////////////////////////////////////
@@ -967,84 +972,89 @@
                 timeline.push({timeline: procedures_feedback[trials.shift().type]});
             timeline.push(blockBreak);
 
-            // timeline.push({
-            //     type: 'instructions',
-            //     pages: [''],
-            //     show_clickable_nav: false,
-            //     on_load: ()=>gov.workingMemoryTaskStim(),
-            //     on_finish: (trial)=>{
-            //         gov.fullscreenMode();
-            //         gov.storeMiscTrialData(trial);
-            //     }
-            // });
+            if (memoryMaintenanceTask == true)
+            {
+                timeline.push({
+                    type: 'instructions',
+                    pages: [''],
+                    show_clickable_nav: false,
+                    on_load: ()=>gov.maintainMemoryTaskStim(5),
+                    on_finish: (trial)=>{
+                        gov.fullscreenMode();
+                        gov.storeMiscTrialData(trial);
+                    }
+                });
 
-            // if (beepIfIncorrect == true)
-            // {
-            //     timeline.push({
-            //         type: 'instructions',
-            //         pages: [''],
-            //         show_clickable_nav: false,
-            //         on_load: ()=>gov.workingMemoryTaskRecall(1,incorrectAudioSrc),
-            //         on_finish: (trial)=>{
-            //             gov.fullscreenMode();
-            //             gov.storeMiscTrialData(trial);
-            //         }
-            //     });
-            // }
+                if (beepIfIncorrect == true)
+                {
+                    timeline.push({
+                        type: 'instructions',
+                        pages: [''],
+                        show_clickable_nav: false,
+                        on_load: ()=>gov.maintainMemoryTaskRecall(incorrectAudioSrc),
+                        on_finish: (trial)=>{
+                            gov.fullscreenMode();
+                            gov.storeMiscTrialData(trial);
+                        }
+                    });
+                }
 
-            // else
-            // {
-            //     timeline.push({
-            //         type: 'instructions',
-            //         pages: [''],
-            //         show_clickable_nav: false,
-            //         on_load: ()=>gov.workingMemoryTaskRecall(1),
-            //         on_finish: (trial)=>{
-            //             gov.fullscreenMode();
-            //             gov.storeMiscTrialData(trial);
-            //         }
-            //     });
-            // }
+                else
+                {
+                    timeline.push({
+                        type: 'instructions',
+                        pages: [''],
+                        show_clickable_nav: false,
+                        on_load: ()=>gov.maintainMemoryTaskRecall(),
+                        on_finish: (trial)=>{
+                            gov.fullscreenMode();
+                            gov.storeMiscTrialData(trial);
+                        }
+                    });
+                }
+            }
                 
-            // timeline.push({
-            //     type: 'instructions',
-            //     pages: [''],
-            //     show_clickable_nav: false,
-            //     on_load: ()=>gov.maintainMemoryTaskStim(5),
-            //     on_finish: (trial)=>{
-            //         gov.fullscreenMode();
-            //         gov.storeMiscTrialData(trial);
-            //     }
-            // });
+            if (workingMemoryTask == true)
+            {
+                timeline.push({
+                    type: 'instructions',
+                    pages: [''],
+                    show_clickable_nav: false,
+                    on_load: ()=>gov.workingMemoryTaskStim(),
+                    on_finish: (trial)=>{
+                        gov.fullscreenMode();
+                        gov.storeMiscTrialData(trial);
+                    }
+                });
 
-            // if (beepIfIncorrect == true)
-            // {
-            //     timeline.push({
-            //         type: 'instructions',
-            //         pages: [''],
-            //         show_clickable_nav: false,
-            //         on_load: ()=>gov.maintainMemoryTaskRecall(incorrectAudioSrc),
-            //         on_finish: (trial)=>{
-            //             gov.fullscreenMode();
-            //             gov.storeMiscTrialData(trial);
-            //         }
-            //     });
-            // }
+                if (beepIfIncorrect == true)
+                {
+                    timeline.push({
+                        type: 'instructions',
+                        pages: [''],
+                        show_clickable_nav: false,
+                        on_load: ()=>gov.workingMemoryTaskRecall(1,incorrectAudioSrc),
+                        on_finish: (trial)=>{
+                            gov.fullscreenMode();
+                            gov.storeMiscTrialData(trial);
+                        }
+                    });
+                }
 
-            // else
-            // {
-            //     timeline.push({
-            //         type: 'instructions',
-            //         pages: [''],
-            //         show_clickable_nav: false,
-            //         on_load: ()=>gov.maintainMemoryTaskRecall(),
-            //         on_finish: (trial)=>{
-            //             gov.fullscreenMode();
-            //             gov.storeMiscTrialData(trial);
-            //         }
-            //     });
-            // }
-
+                else
+                {
+                    timeline.push({
+                        type: 'instructions',
+                        pages: [''],
+                        show_clickable_nav: false,
+                        on_load: ()=>gov.workingMemoryTaskRecall(1),
+                        on_finish: (trial)=>{
+                            gov.fullscreenMode();
+                            gov.storeMiscTrialData(trial);
+                        }
+                    });
+                }
+            }
         }
     }
 
@@ -1204,9 +1214,13 @@
     else {  
             jsPsych.init({
                 timeline: timeline,
-                on_finish: ()=>gov.drawDebriefForm()
+                on_finish:{
+                    ()=>gov.drawDebriefForm();
+                }
             });
     }
+
+    window.location.replace(endRedirectURL);
 
 </script>
 </body>
