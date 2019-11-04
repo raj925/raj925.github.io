@@ -64,7 +64,7 @@
     // (If no comments, that variable is not functional yet so LEAVE IT AS IS!)
 
     const betaTest = true;  // If true, uses a shortened number of trials for quicker testing purposes
-    const doInstruct = true; // If true, shows instructions.
+    const doInstruct = false; // If true, shows instructions.
     const doQuestionnaire = false; // If true, includes questionnaires. 
     const demoQuestions = true; // If true, asks participants for age and gender. Stored in a private folder.
     const advisorEstimateTask = false; // If true, will run a Dietvorst-like advisor estimate task.
@@ -77,7 +77,7 @@
     const blk4ForcedTrials = false; // If true, add an extra block after practice/staircasing of just forced trials.
 
     const numOfPracticeBlocks = 3; // How many staircasing/practice blocks do you want ppts to do?
-    const numOfExperimentalBlocks = 6; // How many regular blocks of trials do you want ppts to do?
+    const numOfExperimentalBlocks = 3; // How many regular blocks of trials do you want ppts to do?
     const numOfPracticeTrialsPerBlock = 30; // How many trials in each practice block?
     const numOfChoiceTrialsPerBlock = 40; // How many choice trials in each experimental block?
     const numOfForcedTrialsPerBlock = 20; // How many forced trials in each experimental block?
@@ -99,7 +99,7 @@
                                      // If false, staircasing only applies in the practice blocks,
                                      // and is then fixed after those blocks.
     const stopIfZero = false;
-    const beepIfIncorrect = true; // If true, play sound if trial is incorrect (see incorrectAudioSrc)
+    const beepIfIncorrect = false; // If true, play sound if trial is incorrect (see incorrectAudioSrc)
 
     const advisor1Src = 'assets/image/human.jpg'; // Filepath for advisor 1 image
     const advisor2Src = 'assets/image/comp.jpg'; // Filepath for advisor 2 image
@@ -1215,7 +1215,7 @@
             jsPsych.init({
                 timeline: timeline,
                 on_finish: (trial)=>{
-                    ()=>gov.drawDebriefForm();
+                    gov.drawDebriefForm();
                 }
             });
     }

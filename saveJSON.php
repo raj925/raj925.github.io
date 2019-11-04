@@ -39,7 +39,7 @@ include("file_with_errors.php");
 ini_set("display_errors", true);
 ini_set("auto_detect_line_endings", true);
 ini_set("memory_limit", -1);
-set_time_limit(0)
+set_time_limit(0);
 $log = "";
 
 function sulk($err, $code) {
@@ -93,6 +93,8 @@ $body = date('Y_m_d_H_i_s') . "_" . $id;
     // else
     //     $write = $data;
 
+    echo $filename;
+
     $empty = false;
 
     if(!$empty) {
@@ -103,7 +105,9 @@ $body = date('Y_m_d_H_i_s') . "_" . $id;
                 // {
                 //     fwrite($handle, stripslashes(json_encode($json)));
                 // }   
+                
                 stream_copy_to_stream(stripslashes(json_encode($json)), $handle);
+                fwrite($handle, stripslashes(json_encode($json)));
                 fclose($handle);
             }
             catch (Exception $e)

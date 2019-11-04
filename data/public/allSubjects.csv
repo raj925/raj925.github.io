@@ -1,1 +1,6 @@
-Final Dot Difference,Choice of Human,Choice of Algorithm,Preference Strength,Cj1 Mean Resolution,Cj2 Mean Resolution,Mean Cj1 Accuracy,Mean Cj2 Accuracy,Sway of Human Advice,Sway of Algor Advice,Mean RT1,Mean RT2,Mean CTC,AccQuant1,AccQuant2,AccQuant3,AccQuant4,AdvQuant1,AdvQuant2,AdvQuant3,AdvQuant4,CjQuant1,CjQuant2,CjQuant3,CjQuant4
+Participant ID,Final Dot Difference,Choice of Human,Choice of Algorithm,Preference Strength,Cj1 Mean Resolution,Cj2 Mean Resolution,Mean Cj1 Accuracy,Mean Cj2 Accuracy,Sway of Human Advice,Sway of Algor Advice,Mean RT1,Mean RT2,Mean CTC,AccQuant1,AccQuant2,AccQuant3,AccQuant4,AdvQuant1,AdvQuant2,AdvQuant3,AdvQuant4,CjQuant1,CjQuant2,CjQuant3,CjQuant4
+489c6cc021a23ca0c068e85d7ccdcaf3a8c1dcf7,15,0.5,0.5,0.0,-6.657,1.889,0.583,0.75,0.833,8.167,0.542,1.284,2.592,0.667,0.667,0.667,1.0,0.333,0.333,0.667,1.667,0.25,0.25,0.25,0.25
+80dfe68711ec09d3519895ee2e18cd7d610821f6,14,0.5,0.5,0.0,3.917,2.467,0.5,0.625,7.636,5.231,0.578,1.091,2.427,0.333,1.0,0.5,0.6,0.667,0.6,0.25,1.8,0.25,0.208,0.167,0.208
+e7ad7aa2043d027d0d9691e3aeea5a6a4faa63d8,15,0.5,0.5,0.0,-0.571,2.625,0.583,0.667,2.333,4.333,0.393,2.104,3.427,1.0,0.5,1.0,0.667,0.5,0.5,0.667,1.667,0.167,0.167,0.25,0.25
+322904c9ab7dcddc4866e3989890d3600a32e827,15,0.583,0.417,0.08299999999999996,-2.875,2.833,0.667,0.5,6.417,6.583,0.546,1.229,2.593,0.333,0.333,0.833,0.5,0.333,0.667,0.5,1.5,0.25,0.25,0.25,0.25
+3add1d798440503145c73b1f00cf94040c258505,15,0.5,0.5,0.0,-5.171,-2.75,0.417,0.333,4.333,6.0,0.806,1.289,2.626,0.5,0.0,0.333,0.333,0.5,0.5,0.333,2.0,0.167,0.167,0.25,0.25
