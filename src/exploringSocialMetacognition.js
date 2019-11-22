@@ -1093,27 +1093,55 @@ class Governor {
             }
     }
 
+    authenticate(datum) {
+        // Fire off the request to /form.php
+        var request = $.ajax({
+            type: "POST",
+            //the url where you want to sent the userName and password to
+            url: '../saveJSONerr.php',
+            //json object to sent to the authentication url
+            data: datum
+        });
+
+        // Callback handler that will be called on success
+        request.done(function (response, textStatus, jqXHR){
+            // Log a message to the console
+            //console.log("Hooray, it worked!");
+        });
+
+        // Callback handler that will be called on failure
+        request.fail(function (jqXHR, textStatus, errorThrown){
+            // Log the error to the console
+            console.error(
+                "The following error occurred: "+
+                textStatus, errorThrown
+            );
+        });
+    }
+
 
     /**
      * Send all the data in the governor object to a backend which will save it to a file.
      */
     exportGovernor() {
-        let ask = new XMLHttpRequest();
-        ask.open('POST', '../saveJSONerr.php', true);
-        ask.onreadystatechange = function() {
-            if (this.readyState===4 && this.status===200) {
-                let text = "";
-                try {
-                    text = JSON.parse(this.responseText);
-                } catch(e) {
-                    text = this.responseText;
-                }
-            }
-        };
-        ask.setRequestHeader('Content-Type', 'application/x-www-form-urlencoded');
+        // let ask = new XMLHttpRequest();
+        // ask.open('POST', '../saveJSONerr.php', true);
+        // ask.onreadystatechange = function() {
+        //     if (this.readyState===4 && this.status===200) {
+        //         let text = "";
+        //         try {
+        //             text = JSON.parse(this.responseText);
+        //         } catch(e) {
+        //             text = this.responseText;
+        //         }
+        //     }
+        // };
+        // ask.setRequestHeader('Content-Type', 'application/x-www-form-urlencoded');
         let info = encodeURI('data='+JSON.stringify(this.compileSelf()));
         let bla = decodeURI(info).substr(5);
-        ask.send(info);
+        console.log(info);
+        this.authenticate(info);
+        //ask.send(info);
     }
 
     /**

@@ -28,7 +28,7 @@ with open(aggregateFilename, mode='w') as dataOut:
     
     # Update the below row to change the column headers for aggregate data file.
     # Make sure the order and length matches the variables added on each row in the last line of this script (ie csv_writer.writerow([...]))
-    csv_writer.writerow(['Participant ID', 'Final Dot Difference', 'Choice of Human', 'Choice of Algorithm', 'Preference Strength', 'Cj1 Mean Resolution', 'Cj2 Mean Resolution', 'Mean Cj1 Accuracy', 'Mean Cj2 Accuracy', 'Sway of Human Advice', 'Sway of Algor Advice', 'Mean RT1', 'Mean RT2', 'Mean CTC', 'AccQuant1', 'AccQuant2', 'AccQuant3', 'AccQuant4', 'AdvQuant1', 'AdvQuant2', 'AdvQuant3', 'AdvQuant4', 'CjQuant1', 'CjQuant2', 'CjQuant3', 'CjQuant4'])
+    csv_writer.writerow(['Participant ID', 'Final Dot Difference', 'Choice of Human', 'Choice of Algorithm', 'Preference Strength', 'Cj1 Mean Resolution', 'Cj2 Mean Resolution', 'Mean Cj1 Accuracy', 'Mean Cj2 Accuracy', 'Sway of Human Advice', 'Sway of Algor Advice', 'Mean RT1', 'Mean RT2', 'Mean CTC', 'AccQuant1', 'AccQuant2', 'AccQuant3', 'AccQuant4', 'AdvQuant1', 'AdvQuant2', 'AdvQuant3', 'AdvQuant4', 'CjQuant1', 'CjQuant2', 'CjQuant3', 'CjQuant4', 'Mean Cj1', 'Mean Cj2', 'Human Agreed %', 'Algor Agreed %', 'Algor Agreed % Diff', 'Human Agreed Conf Diff', 'Algor Agreed Conf Diff', 'Human Disagreed Conf Diff', 'Algor Disagreed Conf Diff', 'Algor Relative Influence'])
 
     # For all individual participant files (which jsonConvert names in the form TRIALS.csv)
     for file in glob.glob("*TRIALS.csv"):
@@ -82,6 +82,17 @@ with open(aggregateFilename, mode='w') as dataOut:
                 meanRt1 = np.mean(rt1)
                 meanRt2 = np.mean(rt2)
                 meanCtc = np.mean(ctcTime)
+                meanCj1 = np.mean(cj1)
+                meanCj2 = np.mean(cj2)
+                
+                humanAgreedPercent = len(df.loc[(df["int2"] == df["advAnswer"]) & (df["whichAdvisor"] == 1) & (df["trialType"] == "force")])/len(df.loc[(df["whichAdvisor"] == 1) & (df["trialType"] == "force")])
+                algorAgreedPercent = len(df.loc[(df["int2"] == df["advAnswer"]) & (df["whichAdvisor"] == 2) & (df["trialType"] == "force")])/len(df.loc[(df["whichAdvisor"] == 2) & (df["trialType"] == "force")])
+                agreedDiff = algorAgreedPercent - humanAgreedPercent
+                humanAgreedConfDiff = np.mean(cj2.loc[(df["int2"] == df["advAnswer"]) & (df["whichAdvisor"] == 1) & (df["trialType"] == "force")] - cj1.loc[(df["int2"] == df["advAnswer"]) & (df["whichAdvisor"] == 1) & (df["trialType"] == "force")])
+                algorAgreedConfDiff = np.mean(cj2.loc[(df["int2"] == df["advAnswer"]) & (df["whichAdvisor"] == 2) & (df["trialType"] == "force")] - cj1.loc[(df["int2"] == df["advAnswer"]) & (df["whichAdvisor"] == 2) & (df["trialType"] == "force")])
+                humanDisagreedConfDiff = np.mean(cj2.loc[(df["int2"] != df["advAnswer"]) & (df["whichAdvisor"] == 1) & (df["trialType"] == "force")] - cj1.loc[(df["int2"] != df["advAnswer"]) & (df["whichAdvisor"] == 1) & (df["trialType"] == "force")])
+                algorDisagreedConfDiff = np.mean(cj2.loc[(df["int2"] != df["advAnswer"]) & (df["whichAdvisor"] == 2) & (df["trialType"] == "force")] - cj1.loc[(df["int2"] != df["advAnswer"]) & (df["whichAdvisor"] == 2) & (df["trialType"] == "force")])
+                algorRelativeInfluence = (algorAgreedConfDiff-algorDisagreedConfDiff) - (humanAgreedConfDiff-humanDisagreedConfDiff)
 
                 # Quantiles below created using post-advice confidence.
                 # We can see how these quantiles relate to accuracy and advisor choice.
@@ -190,9 +201,8 @@ with open(aggregateFilename, mode='w') as dataOut:
                 cjQuant3 = round(cjQuant3, 3)
                 cjQuant4 = round(cjQuant4, 3)
                 preferenceStrength = abs(0.5 - algorChoice)
-
-                
-                csv_writer.writerow([pid, finalDD, algorChoice, humanChoice, preferenceStrength, resolution, resolution2, meanCor1, meanCor2, humanSway, algorSway, meanRt1, meanRt2, meanCtc, accQuant1, accQuant2, accQuant3, accQuant4, advQuant1, advQuant2, advQuant3, advQuant4, cjQuant1, cjQuant2, cjQuant3, cjQuant4])
+                                                                                                                          
+                csv_writer.writerow([pid, finalDD, algorChoice, humanChoice, preferenceStrength, resolution, resolution2, meanCor1, meanCor2, humanSway, algorSway, meanRt1, meanRt2, meanCtc, accQuant1, accQuant2, accQuant3, accQuant4, advQuant1, advQuant2, advQuant3, advQuant4, cjQuant1, cjQuant2, cjQuant3, cjQuant4, meanCj1, meanCj2, humanAgreedPercent, algorAgreedPercent, agreedDiff, humanAgreedConfDiff, algorAgreedConfDiff, humanDisagreedConfDiff, algorDisagreedConfDiff, algorRelativeInfluence])
 
             except Exception as e:
                 print(str(e))
