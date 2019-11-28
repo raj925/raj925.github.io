@@ -12,7 +12,7 @@ import csv
 import glob, os
 
 # Stay in the current directory
-os.chdir("./")
+os.chdir("./JSONS")
 
 logf = open("jsonConvertLog.txt", "w+")
 
@@ -47,7 +47,7 @@ for file in glob.glob("*.json"):
         age = dataJson["rawData"]["miscTrials"][0]["1"]["answer"]
 
         # Subject data filename is made up of date and participant ID and is saved in the private folder.
-        subjectFilename = '../private/' + filename[2] + filename[1] + filename[0] + '_' + ID + '_SUBJECT.csv'
+        subjectFilename = '../../private/' + filename[2] + filename[1] + filename[0] + '_' + ID + '_SUBJECT.csv'
 
         # Open subject file to write. Creates new file if it doesn't already exist, otherwise it truncates the current file.
         with open(subjectFilename, mode='w') as subject_file:
@@ -62,7 +62,7 @@ for file in glob.glob("*.json"):
         trials = dataJson["processedData"]["trials"]
         
         # Trials data filename is made up of date and participant ID and is saved in the public folder.
-        trialsFilename = '../public/' + filename[2] + filename[1] + filename[0] + '_' + ID + '_TRIALS.csv'
+        trialsFilename = '../Trials/' + filename[2] + filename[1] + filename[0] + '_' + ID + '_TRIALS.csv'
 
         # Open trials file to write.
         with open(trialsFilename, mode='w') as trials_file:

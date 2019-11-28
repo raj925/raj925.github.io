@@ -106,7 +106,7 @@
     const advisor2Src = 'assets/image/comp.jpg'; // Filepath for advisor 2 image
     const incorrectAudioSrc = 'assets/audio/beep.mp3'; // Filepath of sound played when incorrect
 
-    const endRedirectURL = 'https://app.prolific.co/submissions/complete?cc=595E8D06'; //What URL to redirect to after the experiment, usually a Prolific completion URL.
+    const endRedirectURL = 'https://www.bbc.co.uk'; //What URL to redirect to after the experiment, usually a Prolific completion URL.
 
     // Possible future extensions: See Stim Again, Difference Advisors with/out confidence
 
@@ -302,6 +302,7 @@
         beepOn: beepIfIncorrect,
         audioSrc: incorrectAudioSrc,
         staircase: wholeExpStaircasing,
+        redirect: endRedirectURL,
         advisorClass
     });
 
@@ -1221,7 +1222,6 @@
             });
     }
 
-    //window.location.replace(endRedirectURL);
 
 </script>
 </body>

@@ -17,8 +17,8 @@ import glob, os
 import numpy as np
 
 # Set directory and filename to save csv file to.
-os.chdir("./")
-aggregateFilename = "./allSubjects.csv"
+os.chdir("./Trials")
+aggregateFilename = "../allSubjects.csv"
 
 logf = open("aggregateDataLog.txt", "w+")
 

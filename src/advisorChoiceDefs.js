@@ -1913,6 +1913,7 @@ class AdvisorChoice extends DotTask {
         this.beepOn = args.beepOn;
         this.audioSrc = args.audioSrc; 
         this.staircase = args.staircase;
+        this.redirect = args.redirect;
     }
 
     /**
@@ -2794,6 +2795,7 @@ class AdvisorChoice extends DotTask {
         ];
         document.querySelector('body').innerHTML = "";
         this.endExperiment();
+        window.location.replace(this.redirect);
     }
 
     feedback(data, includePayment = false) {
