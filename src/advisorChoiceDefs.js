@@ -678,7 +678,12 @@ class DotTask extends Governor {
             type: 'text'
         });
         questions.push({
-            prompt: 'Please provide age',
+            prompt: 'How many hours on any given day would you say you spend on an electronic device such as a smartphone or computer? (enter a single digit, such as: 1)',
+            mandatory: true,
+            type: 'text'
+        });
+        questions.push({
+            prompt: 'Please provide your age',
             mandatory: true,
             type: 'text'
         });
@@ -702,6 +707,11 @@ class DotTask extends Governor {
             if (i ==0)
             {
                 commentA.placeholder = 'Enter your gender here'
+            }
+
+            else if (i == 1)
+            {
+                commentA.placeholder = 'Enter the number of hours here'
             }
 
             else
@@ -737,13 +747,13 @@ class DotTask extends Governor {
                     e.preventDefault();
                     if(!checkResponse(this.form))
                         return false;
-                    if (isNaN(parseInt(form.querySelector('#demoCommentAnswer1').value)))
+                    if (isNaN(parseInt(form.querySelector('#demoCommentAnswer2').value)))
                     {
                         return false;
                     }
                     else
                     {
-                        if (parseInt(form.querySelector('#demoCommentAnswer1').value) < 18 || parseInt(form.querySelector('#demoCommentAnswer1').value) > 100)
+                        if (parseInt(form.querySelector('#demoCommentAnswer2').value) < 18 || parseInt(form.querySelector('#demoCommentAnswer1').value) > 100)
                         {
                             return false;
                         }
@@ -758,6 +768,17 @@ class DotTask extends Governor {
                         return false;
                     if (form.querySelector('#demoCommentAnswer0').value != 'm' && form.querySelector('#demoCommentAnswer0').value != 'f')
                         return false;
+                    if (i > 0)
+                    {
+                        if (isNaN(parseInt(form.querySelector('#demoCommentAnswer1').value)))
+                        {
+                            return false;
+                        }
+                        if (form.querySelector('#demoCommentAnswer1').value.length > 1)
+                        {
+                            return false;
+                        }
+                    }
                     saveResponse(this.form);
                     let div = this.form.querySelector('.demo-container:not(.hidden)');
                     div.classList.add('hidden');
@@ -775,8 +796,12 @@ class DotTask extends Governor {
                 answer: form.querySelector('#demoCommentAnswer0').value
             },
             {
-                question: 'age',
+                question: 'deviceUse',
                 answer: form.querySelector('#demoCommentAnswer1').value
+            },
+            {
+                question: 'age',
+                answer: form.querySelector('#demoCommentAnswer2').value
             }
         ];
         jsPsych.finishTrial(this.demo);

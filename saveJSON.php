@@ -84,7 +84,7 @@ $id = (string) $json["participantId"][0];
 //     sulk("Invalid studyId '$eid'.", 403);
 // }
 
-const PATH = "./data/public/";
+const PATH = "./data/public/JSONs/";
 $body = date('Y_m_d_H_i_s') . "_" . $id;
 
     $filename = PATH . $body . ".json";

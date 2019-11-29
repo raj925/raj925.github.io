@@ -44,6 +44,12 @@ div#debriefManipulationQuestion {
     margin-bottom:30px;
 }
 
+#demoCommentQuestion2
+{
+    margin-bottom:30px;
+}
+
+
 textarea {
     resize: none;
     position:absolute;

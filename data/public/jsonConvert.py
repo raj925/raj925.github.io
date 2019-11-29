@@ -44,7 +44,8 @@ for file in glob.glob("*.json"):
         # Get the demographic data from the JSON
         ID = dataJson["rawData"]["participantId"]
         gender = dataJson["rawData"]["miscTrials"][0]["0"]["answer"]
-        age = dataJson["rawData"]["miscTrials"][0]["1"]["answer"]
+        deviceUse = dataJson["rawData"]["miscTrials"][0]["1"]["answer"]
+        age = dataJson["rawData"]["miscTrials"][0]["2"]["answer"]
 
         # Subject data filename is made up of date and participant ID and is saved in the private folder.
         subjectFilename = '../../private/' + filename[2] + filename[1] + filename[0] + '_' + ID + '_SUBJECT.csv'
@@ -54,9 +55,9 @@ for file in glob.glob("*.json"):
             subject_writer = csv.writer(subject_file, delimiter=',', quotechar='"', quoting=csv.QUOTE_MINIMAL)
             
             # Write the column headers first.
-            subject_writer.writerow(['ID', 'date', 'gender', 'age'])
+            subject_writer.writerow(['ID', 'date', 'gender', 'age', 'deviceUse'])
             # Write the corresponding data under each column header.
-            subject_writer.writerow([ID, date, gender, age])
+            subject_writer.writerow([ID, date, gender, age, deviceUse])
 
         # Get trials data from the JSON.
         trials = dataJson["processedData"]["trials"]
