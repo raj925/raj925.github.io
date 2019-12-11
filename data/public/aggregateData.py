@@ -43,10 +43,10 @@ with open(aggregateFilename, mode='w') as dataOut:
 
                 gender = "";
                 age = 0;
-                for subjectFile in os.listdir('../../private'):
+                for subjectFile in os.listdir('../../private/Subjects'):
                     subjectName = '*' + pid + '_SUBJECT.csv'
                     if fnmatch.fnmatch(subjectFile, subjectName):
-                        f = '../../private/' + subjectFile
+                        f = '../../private/Subjects/' + subjectFile
                         with open(f) as subjectDataIn:
                             subjectDf = pd.read_csv(subjectDataIn, usecols=['ID','date','gender','age','deviceUse'])
                             gender = subjectDf["gender"][0]

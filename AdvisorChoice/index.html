@@ -50,6 +50,13 @@
                 properly the experiment requires a modern browser with javascript enabled.</p>
         </div>
     </div>
+<script type="text/javascript">
+  window.onbeforeunload = confirmExit;
+  function confirmExit()
+  {
+    return "Are you sure you want to leave this page? Your progress may not be saved.";
+  }
+</script>
 <script type="module">
     import {DoubleDotGrid, Advisor, Cue, utils} from '../src/exploringSocialMetacognition.js';
     import {AdvisorChoice, trialTypes} from "../src/advisorChoiceDefs.js";
@@ -66,7 +73,7 @@
 
     const betaTest = true;  // If true, uses a shortened number of trials for quicker testing purposes
     const doInstruct = false; // If true, shows instructions.
-    const doQuestionnaire = false; // If true, includes questionnaires. 
+    const doQuestionnaire = true; // If true, includes questionnaires. 
     const demoQuestions = true; // If true, asks participants for age and gender. Stored in a private folder.
     const advisorEstimateTask = false; // If true, will run a Dietvorst-like advisor estimate task.
 
@@ -90,7 +97,7 @@
     const trialPreInterval = 200; // Number of milliseconds between trials.
     const trialPreStim = 500; // Number of milliseconds before the stimulus (with fixation cross on screen)
     const trialStimDuration = 160; // Number of milliseconds that the stimulus should flash up for.
-    const trialFeedbackDuration = 160; // Number of milliseconds at the end of each trial.
+    const trialFeedbackDuration = 200; // Number of milliseconds at the end of each trial.
 
     const adviceWithConfidence = false; // If true, advisors give a confidence % 
                                      // along with their advice of left/right. 
@@ -100,7 +107,7 @@
                                      // If false, staircasing only applies in the practice blocks,
                                      // and is then fixed after those blocks.
     const stopIfZero = false;
-    const beepIfIncorrect = false; // If true, play sound if trial is incorrect (see incorrectAudioSrc)
+    const beepIfIncorrect = true; // If true, play sound if trial is incorrect (see incorrectAudioSrc)
 
     const advisor1Src = 'assets/image/human.jpg'; // Filepath for advisor 1 image
     const advisor2Src = 'assets/image/comp.jpg'; // Filepath for advisor 2 image
@@ -466,6 +473,22 @@
         on_load: ()=>gov.drawProgressBar(),
         on_finish: (trial)=>gov.storeMiscTrialData(trial)
     };
+
+    const questionStart = {
+        type: 'instructions',
+        pages: ["<p>You will first be asked a series of questions before starting the experiment.</p>" + "<p>Press Next to begin.</p>"],
+        show_clickable_nav: true,
+        on_load: ()=>gov.drawProgressBar(),
+        on_finish: (trial)=>gov.storeMiscTrialData(trial)
+    };
+
+    const questionEnd = {
+        type: 'instructions',
+        pages: ["<p>Please take some time to answer a few more questions.</p>" + "<p>Press Next to begin.</p>"],
+        show_clickable_nav: true,
+        on_load: ()=>gov.drawProgressBar(),
+        on_finish: (trial)=>gov.storeMiscTrialData(trial)
+    }
 
     const blockBreak = {
         type: 'instructions',
@@ -885,13 +908,14 @@
 
     if (doQuestionnaire == true)
     {
+        timeline.push(questionStart);
         for (let x = 0;x<Qs.length;x++)
         {
             timeline.push({
                 type: 'instructions',
                 pages: [''],
                 show_clickable_nav: false,
-                on_load: ()=>gov.drawRadioQuestionnaire(Qs[x],As[x],names[x]),
+                on_load: ()=>gov.drawRadioQuestionnaire(utils.shuffle(Qs[x]),As[x],names[x]),
                 on_finish: (trial)=>{
                     gov.fullscreenMode();
                     gov.storeMiscTrialData(trial);
@@ -1194,7 +1218,22 @@
     // Trust questionnaire
     if (doQuestionnaire == true)
     {
+        timeline.push(questionEnd);
         timeline.push(genTrustQuestionnaire);
+        order = utils.randPerm(2);
+        for (let x = 0;x<endQs.length;x++)
+        {
+            timeline.push({
+                type: 'instructions',
+                pages: [''],
+                show_clickable_nav: false,
+                on_load: ()=>gov.drawRadioQuestionnaire(utils.shuffle(endQs[order[x]]),endAs[x],endNames[x]),
+                on_finish: (trial)=>{
+                    gov.fullscreenMode();
+                    gov.storeMiscTrialData(trial);
+                }
+            });
+        }
     }
 
 

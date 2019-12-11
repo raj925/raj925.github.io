@@ -1282,25 +1282,36 @@ class DotTask extends Governor {
             commentQ.id = 'questionCommentQuestion'+i;
             commentQ.className = 'question question';
             commentQ.innerHTML = "<strong>Q"+(i+1)+"/"+(questions.length) + ":  " + questions[i].prompt + "</strong> ";
+            commentQ.style = "font-size: 1.5em";
             let commentA = comment.appendChild(document.createElement('div'));
 
             let radios = commentA.appendChild(document.createElement('div'));
-            radios.className = 'radios';
-            radios.id = 'options';
-            radios.style = 'margin-top: 10px';
+            let table = radios.appendChild(document.createElement('table'));
+            table.style = 'margin-right: auto; margin-left: auto';
             for(let o = 0; o < questions[i].nOptions; o++) {
-                let label = radios.appendChild(document.createElement('label'));
+                let tr = table.appendChild(document.createElement('tr'));
+                radios.className = 'radios';
+                radios.id = 'options';
+                radios.style = 'margin-top: 10px';
+
+                let td = tr.appendChild(document.createElement('td'));
+
+                let label = td.appendChild(document.createElement('label'));
                 let labelid = "label-"+i+"-"+o;
                 label.id = labelid;
                 label.style = "display:block; margin:5px";
+
                 let choice = document.getElementById(labelid);
                 choice.innerHTML = options[o];
 
-                let radio = choice.appendChild(document.createElement('input'));
+
+                let td2 = tr.appendChild(document.createElement('td'));
+
+                let radio = td2.appendChild(document.createElement('input'));
                 radio.type = 'radio';
                 radio.value = (o + 1).toString();
                 radio.name = commentQ.id;
-                radio.style = "justify-self: center";
+                radio.style = "justify-self: center; height: 3em; width: 3em";
             } 
 
             let ok = comment.appendChild(document.createElement('button'));
@@ -1341,7 +1352,7 @@ class DotTask extends Governor {
                     if(!checkResponse(this.form))
                         return false;
                     saveResponse(this.form);
-                    owner.estimateFormSubmit(form,qs,numOfQuestions);
+                    owner.radioFormSubmit(form,questions,numOfQuestions,name);
                 };
             else
                 ok.onclick = function(e) {
@@ -1360,22 +1371,24 @@ class DotTask extends Governor {
 
     /**
      * Submit the questionnaire form
-     * Needs to be done for each questionnaire to allow for multiple
-     *
+     * Needs to be done for each questionnaire to allow for multiple sets of survey data
+     * to be collected. 
      */
-    radioFormSubmit(form,qs,numOfQuestions) {
-        radioData = [];
+    radioFormSubmit(form,qs,numOfQuestions,name) {
+        var radioData = [];
         for (let q = 0;q<numOfQuestions;q++)
         {
-            let questionQuery = '#questionCommentQuestion' + q;
-            radioData.push({question: qs[q]},{answer: form.querySelector(questionQuery).value});
+            let questionQuery = '#questionCommentContainer' + q;
+            //radioData.push({question: qs[q]},{answer: form.querySelector(questionQuery).answer});
+            radioData.push({question: qs[q].prompt, answer: qs[q].answer});
         }
         this.radio = radioData;
         jsPsych.finishTrial(this.radio);
     }
 
     /**
-    *
+    * Memory maintanence task stimulus 
+    * Show a string of letters for participant to memorise.
     */
     maintainMemoryTaskStim(len)
     {
@@ -2504,7 +2517,7 @@ class AdvisorChoice extends DotTask {
             choiceImgs.push(img);
             if(a === 0) {
                 let p = display_element.appendChild(document.createElement('p'));
-                p.innerText = 'Click on a portrait to see the advisor\'s advice';
+                p.innerText = 'Click on an advisor to receieve their advice.';
                 p.className = 'advisorChoice-choice';
             }
         }

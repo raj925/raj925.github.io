@@ -25,6 +25,8 @@ General thanks to https://css-tricks.com/styling-cross-browser-compatible-range-
     --slider-thumb-margin-top: calc((var(--slider-track-height) - var(--slider-thumb-height)) / 2);
 }
 
+
+
 div#jspsych-canvas-sliders-response-prompt > p {
     margin-bottom: 0;
 }

@@ -19,6 +19,8 @@ logf = open("jsonConvertLog.txt", "w+")
 # For all json files in the current directory
 # No need to worry about the same json file being processed twice.
 for file in glob.glob("*.json"):
+    surveyData = [[],[],[]]
+    questions = [[],[],[]]
     try:
         filename = file.split("_")
         
@@ -47,9 +49,33 @@ for file in glob.glob("*.json"):
         deviceUse = dataJson["rawData"]["miscTrials"][0]["1"]["answer"]
         age = dataJson["rawData"]["miscTrials"][0]["2"]["answer"]
 
-        # Subject data filename is made up of date and participant ID and is saved in the private folder.
-        subjectFilename = '../../private/' + filename[2] + filename[1] + filename[0] + '_' + ID + '_SUBJECT.csv'
+        miscTrials = dataJson["rawData"]["miscTrials"]
+        surveys = len(miscTrials)
+        for x in range(1,surveys):
+            if "0" in miscTrials[x]:
+                for y in range(0,len(miscTrials[x])):
+                    if str(y) in miscTrials[x]:
+                        surveyData[x-1].append(miscTrials[x][str(y)]["answer"])
+                        questions[x-1].append(miscTrials[x][str(y)]["question"])
+            else:
+                break
 
+        surveyData = list(filter(None, surveyData))
+        questions = list(filter(None, questions))
+        print(surveyData)
+        print(questions)
+
+        if len(surveyData) > 0:
+            for n in range(0,len(surveyData)):
+                surveyFilename = '../Surveys/' + filename[2] + filename[1] + filename[0] + '_' + ID + '_SURVEY' + str(n+1) + '.csv'
+                with open(surveyFilename, mode='w') as survey_file:
+                    survey_writer = csv.writer(survey_file, delimiter=',', quotechar='"', quoting=csv.QUOTE_MINIMAL)
+                    survey_writer.writerow(questions[n])
+                    survey_writer.writerow(surveyData[n])
+
+        # Subject data filename is made up of date and participant ID and is saved in the private folder.
+        subjectFilename = '../../private/Subjects/' + filename[2] + filename[1] + filename[0] + '_' + ID + '_SUBJECT.csv'
+        
         # Open subject file to write. Creates new file if it doesn't already exist, otherwise it truncates the current file.
         with open(subjectFilename, mode='w') as subject_file:
             subject_writer = csv.writer(subject_file, delimiter=',', quotechar='"', quoting=csv.QUOTE_MINIMAL)
@@ -103,6 +129,7 @@ for file in glob.glob("*.json"):
 
                     # Write our data one trial at a time to the row.
                     subject_writer.writerow([currentTrial["id"], currentTrial["block"]+1, currentTrial["practice"], currentTrial["correctAnswer"], currentTrial["dotDifference"], currentTrial["initialAnswer"], currentTrial["initialConfidence"], cor1, currentTrial["finalAnswer"], currentTrial["finalConfidence"], cor2, currentTrial["typeName"], currentTrial["advisorId"], currentTrial["advisorAnswer"], currentTrial["advisorCorrect"], currentTrial["advisorConfidence"], rt1, rt2, ctcTime])
+
     except Exception as e:
         error = "Error in File: " + file
         logf.write(error)

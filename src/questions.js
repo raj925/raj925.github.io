@@ -98,7 +98,132 @@ const closQs = ["I think that having clear rules and order at work is essential 
 const closAs = ["Strongly Disagree", "Moderately Disagree", "Slightly Disagree", "Neither Agree nor Disagree", "Slightly Agree", "Moderately Agree", "Strongly Agree"];
 const closName = "Need for Closure";
 
+const trustAI1 = ["Overall, I feel positively toward intelligent systems.",
+"I'm glad I have the option of using intelligent systems.",
+"Using intelligent systems is fun.",
+"I dislike intelligent systems.",
+"I believe that intelligent systems provide viable alternative solutions to problems compared to what humans alone could produce.",
+"I am open to using intelligent systems in my daily life.",
+"Human decision making will be enhanced with intelligent systems.",
+"I know intelligent systems will do their job properly.",
+"If I am not sure about a decision, I trust that an intelligent system will provide the best solution.",
+"Intelligent systems help me to plan.",
+"Intelligent systems help me to coordinate with others.",
+"Intelligent systems help me to understand the world around me.",
+"I use many different types of intelligent systems on an average day.",
+"I spend a lot of my time interacting with intelligent systems on an average day.",
+"I would feel a sense of loss if an intelligent system was unavailable and I could no longer use it.",
+"I feel a sense of attachment to using intelligent systems.",
+"I find intelligent systems useful in my job.",
+"Using intelligent systems makes it easier to do my job.",
+"When I am uncertain about a decision, I believe an intelligent system rather than another person.",
+"I generally allow my data to be used to make my experience using intelligent systems better.",
+"I trust that intelligent systems are safe to use.",
+"Intelligent systems are secure.",
+"I can trust intelligent systems.",
+"I'm worried about the general safety of intelligent systems.",
+"Using intelligent systems can lead to harmful or dangerous outcomes.",
+"I am wary of intelligent systems.",
+"I'm worried that failure or malfunctions of intelligent systems may cause problems.",
+"I am suspicious of an intelligent system's action, or outputs.",
+"I worry that intelligent systems will lead to a surveillance state.",
+"I am concerned that intelligent systems will use my personal information for other purposes without my authorisation.",
+"I'm concerned that intelligent systems will collect too much personal information from me.",
+"I find it easy to learn to use new intelligent systems.",
+"I find intelligent systems easy to use.",
+"I am familiar with intelligent systems.",
+"I have the knowledge necessary to use intelligent systems.",
+"My interactions with intelligent systems are clear and understandable."];
 
-Qs = [cogQs, closQs];
+const trustAI2 = ["I trust that intelligent systems are safe to use.",
+"Intelligent systems are secure.",
+"Overall, I feel positively toward intelligent systems.",
+"I'm glad I have the option of using intelligent systems.",
+"I wish intelligent systems weren't around.",
+"I dislike intelligent systems.",
+"I can rely on intelligent systems to do their best every time I use them.",
+"I can trust intelligent systems.",
+"I am confident in intelligent systems.",
+"I know intelligent systems will do their job properly.",
+"Intelligent systems help me to plan.",
+"Intelligent systems behave in a way that makes sense to me.",
+"I am open to using intelligent systems in my daily life.",
+"When interacting with intelligent systems, I find them flexible to my needs.",
+"Intelligent systems are deceptive.",
+"I am suspicious of an intelligent system's action, or outputs.",
+"I like using intelligent systems for decision making.",
+"Human decision making will be enhanced with intelligent systems.",
+"Intelligent systems use appropriate methods to reach decisions."];
+
+const bigFiveQs = ["I see myself as someone who is talkative",
+"I see myself as someone who tends to find fault with others",
+"I see myself as someone who does a thorough job",
+"I see myself as someone who is depressed, blue",
+"I see myself as someone who is original, comes up with new ideas",
+"I see myself as someone who is reserved",
+"I see myself as someone who is helpful and unselfish with others",
+"I see myself as someone who can be somewhat careless",
+"I see myself as someone who is relaxed, handles stress well",
+"I see myself as someone who is curious about many different things",
+"I see myself as someone who is full of energy",
+"I see myself as someone who starts quarrels with others",
+"I see myself as someone who is a reliable worker",
+"I see myself as someone who can be tense",
+"I see myself as someone who is ingenious, a deep thinker",
+"I see myself as someone who generates a lot of enthusiasm",
+"I see myself as someone who has a forgiving nature",
+"I see myself as someone who tends to be disorganised",
+"I see myself as someone who worries a lot",
+"I see myself as someone who has an active imagination",
+"I see myself as someone who tends to be quiet",
+"I see myself as someone who is generally trusting",
+"I see myself as someone who tends to be lazy",
+"I see myself as someone who is emotionally stable, not easily upset",
+"I see myself as someone who is inventive",
+"I see myself as someone who has an assertive personality",
+"I see myself as someone who can be cold and aloof",
+"I see myself as someone who perseveres until task is finished",
+"I see myself as someone who can be moody",
+"I see myself as someone who values artistic, aesthetic experiences",
+"I see myself as someone who is sometimes shy, inhibited",
+"I see myself as someone who is considerate and kind to almost everyone",
+"I see myself as someone who does things efficiently",
+"I see myself as someone who remains calm in tense situations",
+"I see myself as someone who prefers work the is routine",
+"I see myself as someone who is outgoing, sociable",
+"I see myself as someone who is sometimes rude to others",
+"I see myself as someone who makes plans and follows through with them",
+"I see myself as someone who gets nervous easily",
+"I see myself as someone who likes to reflect, play with ideas",
+"I see myself as someone who has few artistic interests",
+"I see myself as someone who likes to cooperate with others",
+"I see myself as someone who is easily distracted",
+"I see myself as someone who is sophisticated in art, music or literature"];
+
+const fiveAs = ["Disagree Strongly", "Disagree a Little", "Neither Agree nor Disagree", "Agree a Little", "Agree Strongly"];
+
+const advisor1Qs = ["The human advisor is reliable.",
+"The human advisor is dependable.",
+"I can trust the human advisor.",
+"I am confident in the human advisor."];
+
+const advisor2Qs = ["The computer advisor is reliable.",
+"The computer advisor is dependable.",
+"I can trust the computer advisor.",
+"I am confident in the computer advisor."];
+
+const advisorAs = ["Strongly Disagree", "Disagree", "Neutral", "Agree", "Strongly Agree"];
+
+const test1Qs = ["Question 1?","Question 2?","Question 3?"];
+const test2Qs = ["Another Question 1?","Another Question 2?","Another Question 3?"];
+const testNames = ["test1", "test2"];
+
+// Qs = [cogQs, closQs];
+Qs = [test1Qs, test2Qs];
 As = [cogAs, closAs];
-names = [cogName, closName] ;
+// names = [cogName, closName] ;
+names = testNames;
+
+endQs = [advisor1Qs, advisor2Qs];
+endAs = advisorAs;
+endNames = ['humanAdvisor','algorAdvisor']
