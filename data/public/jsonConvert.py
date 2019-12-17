@@ -19,8 +19,8 @@ logf = open("jsonConvertLog.txt", "w+")
 # For all json files in the current directory
 # No need to worry about the same json file being processed twice.
 for file in glob.glob("*.json"):
-    surveyData = [[],[],[]]
-    questions = [[],[],[]]
+    surveyData = [[],[],[],[]]
+    questions = [[],[],[],[]]
     try:
         filename = file.split("_")
         
@@ -51,19 +51,22 @@ for file in glob.glob("*.json"):
 
         miscTrials = dataJson["rawData"]["miscTrials"]
         surveys = len(miscTrials)
+        count = 0
         for x in range(1,surveys):
+            print(miscTrials[x])
             if "0" in miscTrials[x]:
                 for y in range(0,len(miscTrials[x])):
                     if str(y) in miscTrials[x]:
-                        surveyData[x-1].append(miscTrials[x][str(y)]["answer"])
-                        questions[x-1].append(miscTrials[x][str(y)]["question"])
+                        print(surveyData)
+                        surveyData[count]
+                        surveyData[count].append(miscTrials[x][str(y)]["answer"])
+                        questions[count].append(miscTrials[x][str(y)]["question"])
+                count = count + 1
             else:
-                break
+                continue
 
         surveyData = list(filter(None, surveyData))
         questions = list(filter(None, questions))
-        print(surveyData)
-        print(questions)
 
         if len(surveyData) > 0:
             for n in range(0,len(surveyData)):

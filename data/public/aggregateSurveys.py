@@ -18,7 +18,7 @@ import fnmatch
 
 os.chdir("./Surveys")
 
-for n in range(0,3):
+for n in range(1,5):
     questions = []
     responses = []
     check = "*SURVEY" + str(n) + ".csv"
