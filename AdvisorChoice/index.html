@@ -476,7 +476,7 @@
 
     const questionStart = {
         type: 'instructions',
-        pages: ["<p>You will first be asked a series of questions before starting the experiment.</p>" + "<p>Press Next to begin.</p>"],
+        pages: ["<p>You will first be asked a series of questions before starting the experiment.</p>" +"<p>Please answer as truthfully as possible.</p>" + "<p>Press Next to begin.</p>"],
         show_clickable_nav: true,
         on_load: ()=>gov.drawProgressBar(),
         on_finish: (trial)=>gov.storeMiscTrialData(trial)
@@ -484,7 +484,7 @@
 
     const questionEnd = {
         type: 'instructions',
-        pages: ["<p>Please take some time to answer a few more questions.</p>" + "<p>Press Next to begin.</p>"],
+        pages: ["<p>Please take some time to answer a few final questions.</p>" + "<p>Please answer as truthfully as possible.</p>" + "<p>Press Next to begin.</p>"],
         show_clickable_nav: true,
         on_load: ()=>gov.drawProgressBar(),
         on_finish: (trial)=>gov.storeMiscTrialData(trial)
@@ -1219,7 +1219,6 @@
     if (doQuestionnaire == true)
     {
         timeline.push(questionEnd);
-        timeline.push(genTrustQuestionnaire);
         order = utils.randPerm(2);
         for (let x = 0;x<endQs.length;x++)
         {
@@ -1227,13 +1226,14 @@
                 type: 'instructions',
                 pages: [''],
                 show_clickable_nav: false,
-                on_load: ()=>gov.drawRadioQuestionnaire(utils.shuffle(endQs[order[x]]),endAs[x],endNames[x]),
+                on_load: ()=>gov.drawRadioQuestionnaire(utils.shuffle(endQs[order[x]]),endAs,endNames[x]),
                 on_finish: (trial)=>{
                     gov.fullscreenMode();
                     gov.storeMiscTrialData(trial);
                 }
             });
         }
+        timeline.push(genTrustQuestionnaire);
     }
 
 
