@@ -1383,6 +1383,7 @@ class DotTask extends Governor {
             radioData.push({question: qs[q].prompt, answer: qs[q].answer});
         }
         this.radio = radioData;
+        document.querySelector('#questionContainer').innerHTML = "";
         jsPsych.finishTrial(this.radio);
     }
 
