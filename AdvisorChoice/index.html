@@ -50,13 +50,13 @@
                 properly the experiment requires a modern browser with javascript enabled.</p>
         </div>
     </div>
-<script type="text/javascript">
+<!-- <script type="text/javascript">
   window.onbeforeunload = confirmExit;
   function confirmExit()
   {
     return "Are you sure you want to leave this page? Your progress may not be saved.";
   }
-</script>
+</script> -->
 <script type="module">
     import {DoubleDotGrid, Advisor, Cue, utils} from '../src/exploringSocialMetacognition.js';
     import {AdvisorChoice, trialTypes} from "../src/advisorChoiceDefs.js";
@@ -72,8 +72,8 @@
     // (If no comments, that variable is not functional yet so LEAVE IT AS IS!)
 
     const betaTest = true;  // If true, uses a shortened number of trials for quicker testing purposes
-    const doInstruct = false; // If true, shows instructions.
-    const doQuestionnaire = true; // If true, includes questionnaires. 
+    const doInstruct = true; // If true, shows instructions.
+    const doQuestionnaire = false; // If true, includes questionnaires. 
     const demoQuestions = true; // If true, asks participants for age and gender. Stored in a private folder.
     const advisorEstimateTask = false; // If true, will run a Dietvorst-like advisor estimate task.
 
@@ -85,7 +85,7 @@
     const blk4ForcedTrials = false; // If true, add an extra block after practice/staircasing of just forced trials.
 
     const numOfPracticeBlocks = 3; // How many staircasing/practice blocks do you want ppts to do?
-    const numOfExperimentalBlocks = 3; // How many regular blocks of trials do you want ppts to do?
+    const numOfExperimentalBlocks = 6; // How many regular blocks of trials do you want ppts to do?
     const numOfPracticeTrialsPerBlock = 30; // How many trials in each practice block?
     const numOfChoiceTrialsPerBlock = 40; // How many choice trials in each experimental block?
     const numOfForcedTrialsPerBlock = 20; // How many forced trials in each experimental block?
@@ -94,10 +94,10 @@
     const initialDotDifference = 15; // What the dot difference starts at (also max DD)
                                    // So (numOfDots +/- dotdifference) in each grid.
 
-    const trialPreInterval = 200; // Number of milliseconds between trials.
+    const trialPreInterval = 500; // Number of milliseconds between trials.
     const trialPreStim = 500; // Number of milliseconds before the stimulus (with fixation cross on screen)
     const trialStimDuration = 160; // Number of milliseconds that the stimulus should flash up for.
-    const trialFeedbackDuration = 200; // Number of milliseconds at the end of each trial.
+    const trialFeedbackDuration = 500; // Number of milliseconds at the end of each trial.
 
     const adviceWithConfidence = false; // If true, advisors give a confidence % 
                                      // along with their advice of left/right. 

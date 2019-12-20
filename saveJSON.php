@@ -6,7 +6,6 @@
  * Time: 10:28
  *
  */
-
 /*
 The $_POST[] array will contain a JSON string which decomposes into:
 {
@@ -19,18 +18,14 @@ The $_POST[] array will contain a JSON string which decomposes into:
     privateData:
         JSON string to write to a protected file
 }
-
 Data are saved in the ./data/[public|private]/raw directory as specified in the incoming metadata.
-
 An JSON string is returned with the following properties:
 {
     error: description of any error which occurred,
     code: response code,
     content: message
 }
-
 */
-
 //phpinfo();
 //error_reporting(0);
 error_reporting(E_ALL);
@@ -41,7 +36,6 @@ ini_set("auto_detect_line_endings", true);
 ini_set("memory_limit", -1);
 set_time_limit(0);
 $log = "";
-
 function sulk($err, $code) {
     $out = array(
         "error" => $err,
@@ -49,54 +43,40 @@ function sulk($err, $code) {
     );
     die(json_encode($out));
 }
-
-
 // Unpack POST data
 $tmp = file_get_contents("php://input");
 $tmp2 = parse_str($tmp,$json);
 $json = json_decode($json["data"],true);
-
 $id = (string) $json["participantId"][0]; 
-
 //$meta = $json["metadata"];
 //$data = $json["data"];
 //$privateData = $json["privateData"];
-
 //$eid = (string) $meta["studyId"];
 // $version = (string) $meta["studyVersion"];
 // $version = str_replace(".", "-", $version);
 //$pid = $meta["idCode"];
-
 // Check input is valid
 // function is_alphanumeric($str, $allowHyphen = false) {
 //     if($allowHyphen)
 //         return (bool) preg_match('/^[0-9a-z\-]+$/i', $str);
 //     return (bool) preg_match('/^[0-9a-z]+$/i', $str);
 // }
-
 // if(!is_alphanumeric($version, true))
 //     sulk("Invalid version format '$version'.", 403);
-
 // if(!is_alphanumeric($pid))
 //     sulk("Invalid id '$pid'.", 403);
-
 // if(!is_alphanumeric($eid, true)) {
 //     sulk("Invalid studyId '$eid'.", 403);
 // }
-
 const PATH = "./data/public/JSONs/";
 $body = date('Y_m_d_H_i_s') . "_" . $id;
-
     $filename = PATH . $body . ".json";
     // if($privacy == "private")
     //     $write = $privateData;
     // else
     //     $write = $data;
-
     echo $filename;
-
     $empty = false;
-
     if(!$empty) {
         if (!file_exists($filename)) {
             try {
@@ -119,7 +99,6 @@ $body = date('Y_m_d_H_i_s') . "_" . $id;
             sulk("File already exists!", 500);
     }
 //}
-
 // Send back the all clear
 die(json_encode(array(
     "error" => "",

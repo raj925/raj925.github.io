@@ -200,6 +200,7 @@ const bigFiveQs = ["I see myself as someone who is talkative",
 "I see myself as someone who is easily distracted",
 "I see myself as someone who is sophisticated in art, music or literature"];
 
+const trustAIAs = ["Strongly Disagree", "Moderately Disagree", "Somewhat Disagree", "Neither Agree nor Disagree", "Somewhat Agree", "Moderately Agree", "Strongly Agree"];
 const fiveAs = ["Disagree Strongly", "Disagree a Little", "Neither Agree nor Disagree", "Agree a Little", "Agree Strongly"];
 
 const advisor1Qs = ["The human advisor is reliable.",

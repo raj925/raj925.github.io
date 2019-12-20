@@ -1142,7 +1142,7 @@ class Governor {
         // ask.setRequestHeader('Content-Type', 'application/x-www-form-urlencoded');
         let info = encodeURI('data='+JSON.stringify(this.compileSelf()));
         let bla = decodeURI(info).substr(5);
-        console.log(info);
+        //console.log(info);
         this.authenticate(info);
         //ask.send(info);
     }

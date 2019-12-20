@@ -534,6 +534,7 @@ class DotTask extends Governor {
         let p = div.insertBefore(document.createElement('p'), div.querySelector('p'));
         p.innerText = "Your score on the last block was " + (Math.round(score*100)/100).toString() + "%.";
         this.drawProgressBar();
+        this.exportGovernor();
     }
 
     /**
