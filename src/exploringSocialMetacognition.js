@@ -103,16 +103,16 @@ class DoubleDotGrid {
         if (this.currentTrialType == 2)
         {
             // Pull array of dots from the js file.
-            array = (choiceWhereDots.dots[((this.choiceTrials[0])-1)+(240*(dd-1))])[dir];
+            array = (choiceWhereDots.dots[this.choiceTrials[0]+(240*(dd-1))])[dir];
         }
         // Forced trials
         else if (this.currentTrialType == 1)
         {
-            array = (forcedWhereDots.dots[((this.forcedTrials[0])-1)+(120*(dd-1))])[dir];
+            array = (forcedWhereDots.dots[this.forcedTrials[0]+(120*(dd-1))])[dir];
         }
         else if (this.currentTrialType == 5)
         {
-            array = (blk4WhereDots.dots[((this.blk4Trials[0])-1)+(60*(dd-1))])[dir];   
+            array = (blk4WhereDots.dots[this.blk4Trials[0]+(60*(dd-1))])[dir];   
         }
         // Catch trials (not preset dot config, random instead.)
         else

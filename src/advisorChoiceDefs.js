@@ -284,6 +284,8 @@ class DotTask extends Governor {
         let marker = document.createElement('div');
         marker.className = 'advisorChoice-marker advisorChoice-middleBar';
         slider.parentElement.appendChild(marker);
+        let container = document.querySelector('#jspsych-sliders-response-table0');
+        container.style = "visibility: hidden";
         let xOffset = 0;
         let xDistance = 50;
         if (this.currentTrialIndex < this.numOfTrials)
@@ -318,6 +320,7 @@ class DotTask extends Governor {
                 self.currentTrial.grid.draw(canvasId);
             }, this.preTrialInterval+this.preStimulusInterval);
         }
+
     }
 
     /**
@@ -327,6 +330,11 @@ class DotTask extends Governor {
     maskDots(canvasContainer) {
             let canvas = canvasContainer.querySelector('canvas');
             this.currentTrial.grid.drawBoundingBoxes(canvas.id);
+            let self = this;
+            setTimeout(function () {
+                let container = document.querySelector('#jspsych-sliders-response-table0');
+                container.style = "";
+            }, 100);
     }
 
     /**
@@ -534,7 +542,7 @@ class DotTask extends Governor {
         let p = div.insertBefore(document.createElement('p'), div.querySelector('p'));
         p.innerText = "Your score on the last block was " + (Math.round(score*100)/100).toString() + "%.";
         this.drawProgressBar();
-        this.exportGovernor();
+        // this.exportGovernor();
     }
 
     /**
@@ -1954,6 +1962,8 @@ class AdvisorChoice extends DotTask {
         this.audioSrc = args.audioSrc; 
         this.staircase = args.staircase;
         this.redirect = args.redirect;
+        this.firstForced = 0;
+        this.firstChoice = 0;
     }
 
     /**
@@ -2043,11 +2053,13 @@ class AdvisorChoice extends DotTask {
         let advisorSets = this.advisorLists.length;
         let blockCount = this.blockStructure.length * advisorSets;
         let practiceBlockCount = this.practiceBlockStructure.length;
-        let blk4Count = this.blk4Structure.length;
         // Same for which side the correct answer appears on
         let whichSideDeck = utils.shuffleShoe([0, 1], advisorSets*utils.sumList(this.blockStructure));
+        let forcedCount = 0;
+        let choiceCount = 0;
+        let blk4Count = 0;
         // Define trials
-        for (let b=0; b<practiceBlockCount+blockCount+blk4Count; b++) {
+        for (let b=0; b<practiceBlockCount+blockCount+this.blk4Structure.length; b++) {
             let advisorSet = 0;
             let advisor0id = null;
             let advisor1id = null;
@@ -2059,7 +2071,7 @@ class AdvisorChoice extends DotTask {
             let advisorBlk4Deck = null;
             if (b >= practiceBlockCount) {
                 advisorSet = 0;
-                if (blk4Count > 0 && b == 3)
+                if (this.blk4Structure.length > 0 && b == 3)
                 {
                     blockStructure = this.blk4Structure[(b-practiceBlockCount)%this.blockStructure.length];
                 }
@@ -2109,9 +2121,10 @@ class AdvisorChoice extends DotTask {
                 // We merely do this for data recoridng purposes at the end of the experiment.
                 if (trialType == 1)
                 {
-                    trialSelect = this.forcedTrials[0];
-                    left = (forcedWhereDots.dots[((this.forcedTrials[0])-1)+(120*(this.dotDifference-1))])[0];
-                    right = (forcedWhereDots.dots[((this.forcedTrials[0])-1)+(120*(this.dotDifference-1))])[1];
+                    trialSelect = this.forcedTrials[forcedCount];
+                    forcedCount++;
+                    left = (forcedWhereDots.dots[trialSelect+(120*(this.dotDifference-1))])[0];
+                    right = (forcedWhereDots.dots[trialSelect+(120*(this.dotDifference-1))])[1];
                     // Is the left or right larger?
                     if (utils.sumList(left,false,true) > utils.sumList(right,false,true))
                     {
@@ -2121,7 +2134,7 @@ class AdvisorChoice extends DotTask {
                     {
                         larger = 1;
                     }
-                    algAns = ((forcedData.advisors[(this.dotDifference)-1].AlgorithmAnswer[id-1])-1);
+                    algAns = ((forcedData.advisors[(this.dotDifference)-1].AlgorithmAnswer[trialSelect])-1);
                     if (algAns == larger)
                     {
                         algCor = 1;
@@ -2130,14 +2143,14 @@ class AdvisorChoice extends DotTask {
                     {
                         algCor = 0;
                     }
-                    algCon = ((forcedData.advisors[(this.dotDifference)-1].cj1[id-1])-1)
-
+                    // algCon = ((forcedData.advisors[(this.dotDifference)-1].cj1[trialSelect-1])-1)
                 }
                 else if (trialType == 2)    
                 {
-                    trialSelect = this.choiceTrials[0];
-                    left = (choiceWhereDots.dots[((this.choiceTrials[0])-1)+(240*(this.dotDifference-1))])[0];
-                    right = (choiceWhereDots.dots[((this.choiceTrials[0])-1)+(240*(this.dotDifference-1))])[1];
+                    trialSelect = this.choiceTrials[choiceCount];
+                    choiceCount++;
+                    left = (choiceWhereDots.dots[trialSelect+(240*(this.dotDifference-1))])[0];
+                    right = (choiceWhereDots.dots[trialSelect+(240*(this.dotDifference-1))])[1];
                     if (utils.sumList(left,false,true) > utils.sumList(right,false,true))
                     {
                         larger = 0;
@@ -2146,7 +2159,7 @@ class AdvisorChoice extends DotTask {
                     {
                         larger = 1;
                     }
-                    algAns = ((choiceData.advisors[(this.dotDifference)-1].AlgorithmAnswer[id-1])-1);
+                    algAns = ((choiceData.advisors[(this.dotDifference)-1].AlgorithmAnswer[trialSelect])-1);
                     if (algAns == larger)
                     {
                         algCor = 1;
@@ -2155,13 +2168,14 @@ class AdvisorChoice extends DotTask {
                     {
                         algCor = 0;
                     }
-                    algCon = ((choiceData.advisors[(this.dotDifference)-1].cj1[id-1])-1)
+                    // algCon = ((choiceData.advisors[(this.dotDifference)-1].cj1[trialSelect-1])-1)
                 }
                 else if (trialType == 5)    
                 {
-                    trialSelect = this.blk4Trials[0];
-                    left = (blk4WhereDots.dots[((this.blk4Trials[0])-1)+(60*(this.dotDifference-1))])[0];
-                    right = (blk4WhereDots.dots[((this.blk4Trials[0])-1)+(60*(this.dotDifference-1))])[1];
+                    trialSelect = this.blk4Trials[blk4Count];
+                    blk4Count++;
+                    left = (blk4WhereDots.dots[trialSelect+(60*(this.dotDifference-1))])[0];
+                    right = (blk4WhereDots.dots[trialSelect+(60*(this.dotDifference-1))])[1];
                     if (utils.sumList(left,false,true) > utils.sumList(right,false,true))
                     {
                         larger = 0;
@@ -2170,7 +2184,7 @@ class AdvisorChoice extends DotTask {
                     {
                         larger = 1;
                     }
-                    algAns = ((blk4Data.advisors[(this.dotDifference)-1].AlgorithmAnswer[id-1])-1);
+                    algAns = ((blk4Data.advisors[(this.dotDifference)-1].AlgorithmAnswer[trialSelect])-1);
                     if (algAns == larger)
                     {
                         algCor = 1;
@@ -2179,7 +2193,7 @@ class AdvisorChoice extends DotTask {
                     {
                         algCor = 0;
                     }
-                    algCon = ((blk4Data.advisors[(this.dotDifference)-1].cj1[id-1])-1)
+                    // algCon = ((blk4Data.advisors[(this.dotDifference)-1].cj1[trialSelect-1])-1)
                 }
                 else
                 {
@@ -2234,7 +2248,8 @@ class AdvisorChoice extends DotTask {
                     fixationDrawTime: [],
                     advisorAnswer: algAns,
                     advisorCorrect: algCor,
-                    advisorConfidence: algCon,
+                    //advisorConfidence: algCon,
+                    advisorConfidence: 0,
                     leftGrid: left,
                     rightGrid: right,
                     whereLarger: larger,
@@ -2244,6 +2259,7 @@ class AdvisorChoice extends DotTask {
                     realId++;
             }
         }
+        console.log(trials)
         return trials;
     }
 
@@ -2292,17 +2308,15 @@ class AdvisorChoice extends DotTask {
      * If confidence is switched off, the advice is simply a left or right word shown on screen.
      * @param {string} [sliderID='#jspsych-canvas-sliders-response-slider0'] - slider to add the marker to
      * @param {string} trial - the type of trial (usually forced or choice)
-     * @param {integer} permArray - usually just set to 1, refers to which dot config to pull advice from.
+     * @param {integer} permArray - refers to which dot config to pull advice from.
      */
-    showAdviceMarker(sliderID = '#jspsych-canvas-sliders-response-slider0', trial = "forced", permArray = 1) {
-
+    showAdviceMarker(sliderID = '#jspsych-canvas-sliders-response-slider0', trial = "forced", permArray = 0) {
         let slider = document.querySelector('#jspsych-canvas-sliders-response-slider0');
         let marker = document.createElement('div');
         marker.className = 'advisorChoice-marker advisorChoice-middleBar';
         slider.parentElement.appendChild(marker);
         let xOffset = 0;
         let xDistance = 50;
-
         if (this.confidenceOn == true)
         {
             // ----- CJ CODE ------
@@ -2320,27 +2334,27 @@ class AdvisorChoice extends DotTask {
 
             if (trial == "forced")
             {
-                let xOffset = ((forcedData.advisors[(this.dotDifference)-1].AlgorithmAnswer[permArray-1])-1) === 1? slider.clientWidth/2 : 0;
-                let xDistance = ((forcedData.advisors[(this.dotDifference)-1].AlgorithmAnswer[permArray-1])-1) === 1?
-                Math.abs(forcedData.advisors[(this.dotDifference)-1].cj1[permArray-1]) : 51 - Math.abs(forcedData.advisors[(this.dotDifference)-1].cj1[permArray-1]);
+                let xOffset = ((forcedData.advisors[(this.dotDifference)-1].AlgorithmAnswer[permArray])-1) === 1? slider.clientWidth/2 : 0;
+                let xDistance = ((forcedData.advisors[(this.dotDifference)-1].AlgorithmAnswer[permArray])-1) === 1?
+                Math.abs(forcedData.advisors[(this.dotDifference)-1].cj1[permArray]) : 51 - Math.abs(forcedData.advisors[(this.dotDifference)-1].cj1[permArray-1]);
                 xOffset -= marker.clientWidth/2;
                 marker.style.left = (xOffset + xDistance * (slider.clientWidth-marker.clientWidth)
                 / 100).toString() + 'px';
             }
             else if (trial == "choice")
             {
-                let xOffset = ((choiceData.advisors[(this.dotDifference)-1].AlgorithmAnswer[permArray-1])-1) === 1? slider.clientWidth/2 : 0;
-                let xDistance = ((choiceData.advisors[(this.dotDifference)-1].AlgorithmAnswer[permArray-1])-1) === 1?
-                Math.abs(choiceData.advisors[(this.dotDifference)-1].cj1[permArray-1]) : 51 - Math.abs(choiceData.advisors[(this.dotDifference)-1].cj1[permArray-1]);
+                let xOffset = ((choiceData.advisors[(this.dotDifference)-1].AlgorithmAnswer[permArray])-1) === 1? slider.clientWidth/2 : 0;
+                let xDistance = ((choiceData.advisors[(this.dotDifference)-1].AlgorithmAnswer[permArray])-1) === 1?
+                Math.abs(choiceData.advisors[(this.dotDifference)-1].cj1[permArray]) : 51 - Math.abs(choiceData.advisors[(this.dotDifference)-1].cj1[permArray]);
                 xOffset -= marker.clientWidth/2;
                 marker.style.left = (xOffset + xDistance * (slider.clientWidth-marker.clientWidth)
                 / 100).toString() + 'px';
             }
             else if (trial == "forceblk4")
             {
-                let xOffset = ((blk4Data.advisors[(this.dotDifference)-1].AlgorithmAnswer[permArray-1])-1) === 1? slider.clientWidth/2 : 0;
-                let xDistance = ((blk4Data.advisors[(this.dotDifference)-1].AlgorithmAnswer[permArray-1])-1) === 1?
-                Math.abs(blk4Data.advisors[(this.dotDifference)-1].cj1[permArray-1]) : 51 - Math.abs(blk4Data.advisors[(this.dotDifference)-1].cj1[permArray-1]);
+                let xOffset = ((blk4Data.advisors[(this.dotDifference)-1].AlgorithmAnswer[permArray])-1) === 1? slider.clientWidth/2 : 0;
+                let xDistance = ((blk4Data.advisors[(this.dotDifference)-1].AlgorithmAnswer[permArray])-1) === 1?
+                Math.abs(blk4Data.advisors[(this.dotDifference)-1].cj1[permArray]) : 51 - Math.abs(blk4Data.advisors[(this.dotDifference)-1].cj1[permArray]);
                 xOffset -= marker.clientWidth/2;
                 marker.style.left = (xOffset + xDistance * (slider.clientWidth-marker.clientWidth)
                 / 100).toString() + 'px';
@@ -2368,7 +2382,9 @@ class AdvisorChoice extends DotTask {
                 // If the advisor says left. 
                 // (There are a few -1s here because the advisor tables start from index 1
                 //     as a result of being originally in Matlab).
-                if (((forcedData.advisors[(this.dotDifference)-1].AlgorithmAnswer[permArray-1])-1) == 0)
+
+                //if (((forcedData.advisors[(this.dotDifference)-1].AlgorithmAnswer[permArray])-1) == 0)
+                if (this.currentTrial.advisorAnswer == 0)
                 {
                     arrowDiv.classList.add('jspsych-jas-present-advice-arrow-' + 'left');
                     arrowDiv.innerText = "LEFT";
@@ -2383,7 +2399,8 @@ class AdvisorChoice extends DotTask {
 
             else if (trial == "choice")
             {
-                if (((choiceData.advisors[(this.dotDifference)-1].AlgorithmAnswer[permArray-1])-1) == 0)
+                //if (((choiceData.advisors[(this.dotDifference)-1].AlgorithmAnswer[permArray])-1) == 0)
+                if (this.currentTrial.advisorAnswer == 0)
                 {
                     arrowDiv.classList.add('jspsych-jas-present-advice-arrow-' + 'left');
                     arrowDiv.innerText = "LEFT";
@@ -2397,7 +2414,8 @@ class AdvisorChoice extends DotTask {
 
             else if (trial == "forceblk4")
             {
-                if (((blk4Data.advisors[(this.dotDifference)-1].AlgorithmAnswer[permArray-1])-1) == 0)
+                //if (((blk4Data.advisors[(this.dotDifference)-1].AlgorithmAnswer[permArray])-1) == 0)
+                if (this.currentTrial.advisorAnswer == 0)
                 {
                     arrowDiv.classList.add('jspsych-jas-present-advice-arrow-' + 'left');
                     arrowDiv.innerText = "LEFT";
@@ -2412,9 +2430,9 @@ class AdvisorChoice extends DotTask {
             else
             {
                 // Falback: just give some random advice.
-                let xOffset = ((forcedData.advisors[(this.dotDifference)-1].AlgorithmAnswer[permArray-1])-1) === 1? slider.clientWidth/2 : 0;
-                let xDistance = ((forcedData.advisors[(this.dotDifference)-1].AlgorithmAnswer[permArray-1])-1) === 1?
-                Math.abs(forcedData.advisors[(this.dotDifference)-1].cj1[permArray-1]) : 51 - Math.abs(forcedData.advisors[(this.dotDifference)-1].cj1[permArray-1]);
+                let xOffset = ((forcedData.advisors[(this.dotDifference)-1].AlgorithmAnswer[permArray])-1) === 1? slider.clientWidth/2 : 0;
+                let xDistance = ((forcedData.advisors[(this.dotDifference)-1].AlgorithmAnswer[permArray])-1) === 1?
+                Math.abs(forcedData.advisors[(this.dotDifference)-1].cj1[permArray]) : 51 - Math.abs(forcedData.advisors[(this.dotDifference)-1].cj1[permArray]);
                 xOffset -= marker.clientWidth/2;
                 marker.style.left = (xOffset + xDistance * (slider.clientWidth-marker.clientWidth)
                 / 100).toString() + 'px';
@@ -2442,17 +2460,16 @@ class AdvisorChoice extends DotTask {
         this.showMarker();
         if(this.currentTrial.type == 1)
         {
-            this.showAdviceMarker('#jspsych-canvas-sliders-response-slider0', "forced", (this.forcedTrials)[0]);
+            this.showAdviceMarker('#jspsych-canvas-sliders-response-slider0', "forced", this.currentTrial.trialSelect);
         }
         else if (this.currentTrial.type == 2)
         {
-            this.showAdviceMarker('#jspsych-canvas-sliders-response-slider0', "choice", (this.choiceTrials)[0]);
+            this.showAdviceMarker('#jspsych-canvas-sliders-response-slider0', "choice", this.currentTrial.trialSelect);
         }
         else if (this.currentTrial.type == 5)
         {
-            this.showAdviceMarker('#jspsych-canvas-sliders-response-slider0', "forceblk4", (this.blk4Trials)[0]);
+            this.showAdviceMarker('#jspsych-canvas-sliders-response-slider0', "forceblk4", this.currentTrial.trialSelect);
         }
-        
     }
 
     /**

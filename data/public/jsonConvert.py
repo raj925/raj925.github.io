@@ -53,11 +53,9 @@ for file in glob.glob("*.json"):
         surveys = len(miscTrials)
         count = 0
         for x in range(1,surveys):
-            print(miscTrials[x])
             if "0" in miscTrials[x]:
                 for y in range(0,len(miscTrials[x])):
                     if str(y) in miscTrials[x]:
-                        print(surveyData)
                         surveyData[count]
                         surveyData[count].append(miscTrials[x][str(y)]["answer"])
                         questions[count].append(miscTrials[x][str(y)]["question"])
@@ -130,8 +128,13 @@ for file in glob.glob("*.json"):
                         rt2 = None
                         ctcTime = None
 
+                    if currentTrial["advisorAnswer"] == currentTrial["correctAnswer"]:
+                        advCorrect = 1
+                    else:
+                        advCorrect = 0
+
                     # Write our data one trial at a time to the row.
-                    subject_writer.writerow([currentTrial["id"], currentTrial["block"]+1, currentTrial["practice"], currentTrial["correctAnswer"], currentTrial["dotDifference"], currentTrial["initialAnswer"], currentTrial["initialConfidence"], cor1, currentTrial["finalAnswer"], currentTrial["finalConfidence"], cor2, currentTrial["typeName"], currentTrial["advisorId"], currentTrial["advisorAnswer"], currentTrial["advisorCorrect"], currentTrial["advisorConfidence"], rt1, rt2, ctcTime])
+                    subject_writer.writerow([currentTrial["id"], currentTrial["block"]+1, currentTrial["practice"], currentTrial["correctAnswer"], currentTrial["dotDifference"], currentTrial["initialAnswer"], currentTrial["initialConfidence"], cor1, currentTrial["finalAnswer"], currentTrial["finalConfidence"], cor2, currentTrial["typeName"], currentTrial["advisorId"], currentTrial["advisorAnswer"], advCorrect, currentTrial["advisorConfidence"], rt1, rt2, ctcTime])
 
     except Exception as e:
         error = "Error in File: " + file
