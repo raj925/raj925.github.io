@@ -2123,16 +2123,23 @@ class AdvisorChoice extends DotTask {
                 {
                     trialSelect = this.forcedTrials[forcedCount];
                     forcedCount++;
-                    left = (forcedWhereDots.dots[trialSelect+(120*(this.dotDifference-1))])[0];
-                    right = (forcedWhereDots.dots[trialSelect+(120*(this.dotDifference-1))])[1];
-                    // Is the left or right larger?
-                    if (utils.sumList(left,false,true) > utils.sumList(right,false,true))
+                    if (trialSelect !== undefined)
                     {
-                        larger = 0;
+                        left = (forcedWhereDots.dots[trialSelect+(120*(this.dotDifference-1))])[0];
+                        right = (forcedWhereDots.dots[trialSelect+(120*(this.dotDifference-1))])[1];
+                        // Is the left or right larger?
+                        if (utils.sumList(left,false,true) > utils.sumList(right,false,true))
+                        {
+                            larger = 0;
+                        }
+                        else
+                        {
+                            larger = 1;
+                        }
                     }
                     else
                     {
-                        larger = 1;
+                        larger = 0;
                     }
                     algAns = ((forcedData.advisors[(this.dotDifference)-1].AlgorithmAnswer[trialSelect])-1);
                     if (algAns == larger)
@@ -2149,15 +2156,22 @@ class AdvisorChoice extends DotTask {
                 {
                     trialSelect = this.choiceTrials[choiceCount];
                     choiceCount++;
-                    left = (choiceWhereDots.dots[trialSelect+(240*(this.dotDifference-1))])[0];
-                    right = (choiceWhereDots.dots[trialSelect+(240*(this.dotDifference-1))])[1];
-                    if (utils.sumList(left,false,true) > utils.sumList(right,false,true))
+                    if (trialSelect !== undefined)
                     {
-                        larger = 0;
+                        left = (choiceWhereDots.dots[trialSelect+(240*(this.dotDifference-1))])[0];
+                        right = (choiceWhereDots.dots[trialSelect+(240*(this.dotDifference-1))])[1];
+                        if (utils.sumList(left,false,true) > utils.sumList(right,false,true))
+                        {
+                            larger = 0;
+                        }
+                        else
+                        {
+                            larger = 1;
+                        }
                     }
                     else
                     {
-                        larger = 1;
+                        larger = 0;
                     }
                     algAns = ((choiceData.advisors[(this.dotDifference)-1].AlgorithmAnswer[trialSelect])-1);
                     if (algAns == larger)
