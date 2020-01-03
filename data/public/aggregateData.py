@@ -119,7 +119,7 @@ with open(aggregateFilename, mode='w') as dataOut:
                 advQuant1 = df.loc[(df["cj2"] < cj2Quant[0.25]), "whichAdvisor"]-1
                 advQuant2 = df.loc[(df["cj2"] > cj2Quant[0.25]) & (df["cj2"] < cj2Quant[0.5]), "whichAdvisor"]-1
                 advQuant3 = df.loc[(df["cj2"] > cj2Quant[0.5]) & (df["cj2"] < cj2Quant[0.75]), "whichAdvisor"]-1
-                advQuant4 = df.loc[(df["cj2"] > cj2Quant[0.75]), "whichAdvisor"]
+                advQuant4 = df.loc[(df["cj2"] > cj2Quant[0.75]), "whichAdvisor"]-1
 
                 # This gives you the distribution of cj2 indicated, so you can see how participants use the confidence scale.
                 cjQuant1 = df.loc[(df["cj2"] < cj2Quant[0.25]), "cj2"]
@@ -192,8 +192,8 @@ with open(aggregateFilename, mode='w') as dataOut:
                 # All of the above fields are rounded to 3 decimal places.
                 algorChoice = round(algorChoice, 3)
                 humanChoice = round(humanChoice, 3)
-                resolution = round(resolution, 3)
-                resolution2 = round(resolution2, 3)
+                resolution = abs(round(resolution, 3))
+                resolution2 = abs(round(resolution2, 3))
                 meanCor1 = round(meanCor1, 3)
                 meanCor2 = round(meanCor2, 3)
                 humanSway = abs(round(humanSway, 3))
@@ -213,7 +213,17 @@ with open(aggregateFilename, mode='w') as dataOut:
                 cjQuant2 = round(cjQuant2, 3)
                 cjQuant3 = round(cjQuant3, 3)
                 cjQuant4 = round(cjQuant4, 3)
-                preferenceStrength = abs(0.5 - algorChoice)
+                preferenceStrength = round(abs(0.5 - algorChoice), 3)
+                meanCj1 = round(meanCj1, 3)
+                meanCj2 = round(meanCj2, 3)
+                humanAgreedPercent = round(humanAgreedPercent, 3)
+                algorAgreedPercent = round(algorAgreedPercent, 3)
+                agreedDiff = round(agreedDiff, 3)
+                humanAgreedConfDiff = round(humanAgreedConfDiff, 3)
+                algorAgreedConfDiff = round(algorAgreedConfDiff, 3)
+                humanDisagreedConfDiff = round(humanDisagreedConfDiff, 3)
+                algorDisagreedConfDiff = round(algorDisagreedConfDiff, 3)
+                algorRelativeInfluence = round(algorRelativeInfluence, 3)
                                                                                                                           
                 csv_writer.writerow([pid, gender, age, deviceUse, finalDD, algorChoice, humanChoice, preferenceStrength, resolution, resolution2, meanCor1, meanCor2, humanSway, algorSway, meanRt1, meanRt2, meanCtc, accQuant1, accQuant2, accQuant3, accQuant4, advQuant1, advQuant2, advQuant3, advQuant4, cjQuant1, cjQuant2, cjQuant3, cjQuant4, meanCj1, meanCj2, humanAgreedPercent, algorAgreedPercent, agreedDiff, humanAgreedConfDiff, algorAgreedConfDiff, humanDisagreedConfDiff, algorDisagreedConfDiff, algorRelativeInfluence])
 

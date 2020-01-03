@@ -361,7 +361,6 @@
         type: 'instructions',
         pages: ["<p>Please do not use the back or forward buttons on your browser during the experiment. Data on your performance will not save until the end of the experiment so do not close your browser unless you would no longer like to participate. Thank you for cooperation!</p>" + "<p>Press Next to begin.</p>"],
         show_clickable_nav: true,
-        on_load: ()=>gov.fullscreenMode(),
         on_finish: (trial)=>gov.storeMiscTrialData(trial)
     };
 
@@ -373,7 +372,6 @@
         '<img width="1000" height="700" src="./instructions/Slide18.jpeg"></img>'
         ],
         show_clickable_nav: true,
-        //on_load: ()=>gov.drawDemographicForm(),
         on_load: ()=>gov.fullscreenMode(),
         on_finish: (trial)=>{
             gov.storeMiscTrialData(trial);
