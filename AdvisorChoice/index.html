@@ -357,6 +357,15 @@
         }
     };
 
+    const browserInstruct = {
+        type: 'instructions',
+        pages: ["<p>Please do not use the back or forward buttons on your browser during the experiment. Data on your performance will not save until the end of the experiment so do not close your browser unless you would no longer like to participate. Thank you for cooperation!</p>" + "<p>Press Next to begin.</p>"],
+        show_clickable_nav: true,
+        on_load: ()=>gov.fullscreenMode(),
+        on_finish: (trial)=>gov.storeMiscTrialData(trial)
+    };
+
+
         /* define thank you message at the end of the experiment */
     const thanks = {
         type: 'instructions',
@@ -964,6 +973,8 @@
     {
         timeline.push(welcome);
     }
+
+    timeline.push(browserInstruct);
 
 
     // fill in the remaining non-advisor practice blocks
