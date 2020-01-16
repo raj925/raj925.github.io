@@ -30,7 +30,6 @@ An JSON string is returned with the following properties:
 //error_reporting(0);
 error_reporting(E_ALL);
 ini_set("display_errors", 1);
-include("file_with_errors.php");
 ini_set("display_errors", true);
 ini_set("auto_detect_line_endings", true);
 ini_set("memory_limit", -1);
@@ -47,45 +46,25 @@ function sulk($err, $code) {
 $tmp = file_get_contents("php://input");
 $tmp2 = parse_str($tmp,$json);
 $json = json_decode($json["data"],true);
-$id = (string) $json["participantId"][0]; 
-//$meta = $json["metadata"];
-//$data = $json["data"];
-//$privateData = $json["privateData"];
-//$eid = (string) $meta["studyId"];
-// $version = (string) $meta["studyVersion"];
-// $version = str_replace(".", "-", $version);
-//$pid = $meta["idCode"];
-// Check input is valid
-// function is_alphanumeric($str, $allowHyphen = false) {
-//     if($allowHyphen)
-//         return (bool) preg_match('/^[0-9a-z\-]+$/i', $str);
-//     return (bool) preg_match('/^[0-9a-z]+$/i', $str);
-// }
-// if(!is_alphanumeric($version, true))
-//     sulk("Invalid version format '$version'.", 403);
-// if(!is_alphanumeric($pid))
-//     sulk("Invalid id '$pid'.", 403);
-// if(!is_alphanumeric($eid, true)) {
-//     sulk("Invalid studyId '$eid'.", 403);
-// }
+$jsonRaw = json_decode($json["processedData"],true);
+$id = $jsonRaw["id"];
+//$id = $json["processedData"]["advisors"]["participantId"]; 
+
 const PATH = "./data/public/JSONs/";
 $body = date('Y_m_d_H_i_s') . "_" . $id;
-    $filename = PATH . $body . ".json";
-    // if($privacy == "private")
-    //     $write = $privateData;
-    // else
-    //     $write = $data;
-    echo $filename;
+    //$filename = PATH . $body . ".json";
+    //echo $filename;
     $empty = false;
+    $folder = PATH . $id;
+    if (!is_dir($folder))
+    {
+        mkdir($folder,0755);
+    }
+    $filename = $folder . "/" . $body . ".json";
     if(!$empty) {
         if (!file_exists($filename)) {
             try {
                 $handle = fopen($filename, "w+b");
-                // while (($data = fread($tmp, 1024)) !== FALSE) 
-                // {
-                //     fwrite($handle, stripslashes(json_encode($json)));
-                // }   
-                
                 stream_copy_to_stream(stripslashes(json_encode($json)), $handle);
                 fwrite($handle, stripslashes(json_encode($json)));
                 fclose($handle);
@@ -93,6 +72,11 @@ $body = date('Y_m_d_H_i_s') . "_" . $id;
             catch (Exception $e)
             {
                 echo 'Caught exception: ',  $e->getMessage(), "\n";
+                $errorFile = PATH . $body . "_ERROR.txt";
+                $errorHandle = fopen($errorFile, "w+b");
+                fwrite($errorHandle, 'PHP - Caught exception: ');
+                fwrite($errorHandle, $e->getMessage());
+                fclose($errorHandle);
                 sulk("Unable to create file.", 500);
             }
         } else

@@ -58,10 +58,14 @@ with open(aggregateFilename, mode='w') as dataOut:
                 df = df.loc[df["block"] > 3]
                 df = df.loc[df["trialType"] != "forceblk4"]
 
-                forcedTrials = df.loc[df["trialType"] == "forced"]
+                forcedTrials = df.loc[df["trialType"] == "force"]
                 choiceTrials = df.loc[df["trialType"] == "choice"]
+                forceNum = len(forcedTrials)
+                choiceNum = len(choiceTrials)
 
                 # Save the fields under each column as a sepearate dataframe variable (basically, a vector).
+                int1 = df["int1"]
+                int2 = df["int2"]
                 cj1 = df["cj1"]
                 cor1 = df["cor1"]
                 cj2 = df["cj2"]
@@ -75,13 +79,17 @@ with open(aggregateFilename, mode='w') as dataOut:
                 dotdifference = df["dotdifference"]
                 finalDD = dotdifference.iloc[numOfTrials-1]
 
-                cj1 = abs(cj1)
-                cj2 = abs(cj2)
+                cj1Orig = cj1
+                cj2Orig = cj2
+                mask = (int1 == 0)
+                mask2 = (int2 == 0)
+                cj1Orig[mask] = (cj1Orig[mask])*-1
+                cj2Orig[mask] = (cj2Orig[mask2])*-1
 
                 # loc is the method in Python Pandas that allows you to pull a certain portion of data based on some filter.
                 # So for below, we want to find the mean of advisor used only for choice trials in order to look at proportion of advisor chosen.
                 # We subtract one here because the advisor ids in the trials files are 1 and 2 rather than 0 and 1.
-                algorChoice = np.mean(whichAdvisor.loc[df["trialType"] == "choice"])-1
+                algorChoice = len(df.loc[(df["trialType"] == "choice") & (df["whichAdvisor"] == 1)])/choiceNum
                 humanChoice = 1 - algorChoice
 
                 # Resolution is the difference in average confidence during correct and error trials.
@@ -90,21 +98,21 @@ with open(aggregateFilename, mode='w') as dataOut:
                 resolution2 = np.mean(cj2.loc[df["cor2"] == 1]) - np.mean(cj2.loc[df["cor2"] == 0])
                 meanCor1 = np.mean(cor1)
                 meanCor2 = np.mean(cor2)
-                humanSway = np.mean(cj2.loc[df["whichAdvisor"] == 1]) - np.mean(cj1.loc[df["whichAdvisor"] == 1])
-                algorSway = np.mean(cj2.loc[df["whichAdvisor"] == 2]) - np.mean(cj1.loc[df["whichAdvisor"] == 2])
+                humanSway = np.mean(cj2Orig.loc[df["whichAdvisor"] == 1] - cj1Orig.loc[df["whichAdvisor"] == 1])
+                algorSway = np.mean(cj2Orig.loc[df["whichAdvisor"] == 2] - cj1Orig.loc[df["whichAdvisor"] == 2])
                 meanRt1 = np.mean(rt1)
                 meanRt2 = np.mean(rt2)
                 meanCtc = np.mean(ctcTime)
-                meanCj1 = np.mean(cj1)
-                meanCj2 = np.mean(cj2)
+                meanCj1 = abs(np.mean(cj1Orig))
+                meanCj2 = abs(np.mean(cj2Orig))
                 
                 humanAgreedPercent = len(df.loc[(df["int2"] == df["advAnswer"]) & (df["whichAdvisor"] == 1) & (df["trialType"] == "force")])/len(df.loc[(df["whichAdvisor"] == 1) & (df["trialType"] == "force")])
                 algorAgreedPercent = len(df.loc[(df["int2"] == df["advAnswer"]) & (df["whichAdvisor"] == 2) & (df["trialType"] == "force")])/len(df.loc[(df["whichAdvisor"] == 2) & (df["trialType"] == "force")])
                 agreedDiff = algorAgreedPercent - humanAgreedPercent
-                humanAgreedConfDiff = np.mean(cj2.loc[(df["int2"] == df["advAnswer"]) & (df["whichAdvisor"] == 1) & (df["trialType"] == "force")] - cj1.loc[(df["int2"] == df["advAnswer"]) & (df["whichAdvisor"] == 1) & (df["trialType"] == "force")])
-                algorAgreedConfDiff = np.mean(cj2.loc[(df["int2"] == df["advAnswer"]) & (df["whichAdvisor"] == 2) & (df["trialType"] == "force")] - cj1.loc[(df["int2"] == df["advAnswer"]) & (df["whichAdvisor"] == 2) & (df["trialType"] == "force")])
-                humanDisagreedConfDiff = np.mean(cj2.loc[(df["int2"] != df["advAnswer"]) & (df["whichAdvisor"] == 1) & (df["trialType"] == "force")] - cj1.loc[(df["int2"] != df["advAnswer"]) & (df["whichAdvisor"] == 1) & (df["trialType"] == "force")])
-                algorDisagreedConfDiff = np.mean(cj2.loc[(df["int2"] != df["advAnswer"]) & (df["whichAdvisor"] == 2) & (df["trialType"] == "force")] - cj1.loc[(df["int2"] != df["advAnswer"]) & (df["whichAdvisor"] == 2) & (df["trialType"] == "force")])
+                humanAgreedConfDiff = np.mean(cj2Orig.loc[(df["int2"] == df["advAnswer"]) & (df["whichAdvisor"] == 1) & (df["trialType"] == "force")] - cj1Orig.loc[(df["int2"] == df["advAnswer"]) & (df["whichAdvisor"] == 1) & (df["trialType"] == "force")])
+                algorAgreedConfDiff = np.mean(cj2Orig.loc[(df["int2"] == df["advAnswer"]) & (df["whichAdvisor"] == 2) & (df["trialType"] == "force")] - cj1Orig.loc[(df["int2"] == df["advAnswer"]) & (df["whichAdvisor"] == 2) & (df["trialType"] == "force")])
+                humanDisagreedConfDiff = np.mean(cj2Orig.loc[(df["int2"] != df["advAnswer"]) & (df["whichAdvisor"] == 1) & (df["trialType"] == "force")] - cj1Orig.loc[(df["int2"] != df["advAnswer"]) & (df["whichAdvisor"] == 1) & (df["trialType"] == "force")])
+                algorDisagreedConfDiff = np.mean(cj2Orig.loc[(df["int2"] != df["advAnswer"]) & (df["whichAdvisor"] == 2) & (df["trialType"] == "force")] - cj1Orig.loc[(df["int2"] != df["advAnswer"]) & (df["whichAdvisor"] == 2) & (df["trialType"] == "force")])
                 algorRelativeInfluence = (algorAgreedConfDiff-algorDisagreedConfDiff) - (humanAgreedConfDiff-humanDisagreedConfDiff)
 
                 # Quantiles below created using post-advice confidence.
@@ -126,7 +134,6 @@ with open(aggregateFilename, mode='w') as dataOut:
                 cjQuant2 = df.loc[(df["cj2"] > cj2Quant[0.25]) & (df["cj2"] < cj2Quant[0.5]), "cj2"]
                 cjQuant3 = df.loc[(df["cj2"] > cj2Quant[0.5]) & (df["cj2"] < cj2Quant[0.75]), "cj2"]
                 cjQuant4 = df.loc[(df["cj2"] > cj2Quant[0.75]), "cj2"]
-
                 
                 # Annoying bit below where we have to check if each quantile is empty, otherwise this messes up the table...
                 if accQuant1.empty:

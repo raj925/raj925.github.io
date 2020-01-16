@@ -125,6 +125,8 @@
     let numOfInstructFiles = 18; 
     let advisorClass = "Cue";
 
+    const prolificID = window.location.search.match('[?&]PROLIFIC_PID=\\w+')[0].substring(14);
+
     /* Advice types:
         0   = balanced
         1|2 = metacog
@@ -317,8 +319,14 @@
     // hoist gov to allow functions access
     window.gov = gov;
 
-    gov.participantId = prolificID===null?
-        sha1.sha1((gov.timeStart).toString() + Math.random().toString()) : sha1.sha1(prolificID);
+    if (prolificID !== null)
+    {
+        gov.participantId = prolificID;
+    }
+    else
+    {
+        gov.participantId = sha1.sha1((gov.timeStart).toString() + Math.random().toString());
+    }
     gov.trials = gov.getTrials();
 
 

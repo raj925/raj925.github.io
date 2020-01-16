@@ -542,7 +542,7 @@ class DotTask extends Governor {
         let p = div.insertBefore(document.createElement('p'), div.querySelector('p'));
         p.innerText = "Your score on the last block was " + (Math.round(score*100)/100).toString() + "%.";
         this.drawProgressBar();
-        // this.exportGovernor();
+        this.exportGovernor();
     }
 
     /**
@@ -1734,7 +1734,7 @@ class DotTask extends Governor {
     endExperiment(saveData = true, clearScreen = true) {
         this.timeEnd = (new Date()).getTime();
         // Exit fullscreen
-        this.fullscreenMode(false);
+        //this.fullscreenMode(false);
         if(saveData === true)
             this.exportGovernor();
         // reset background colour

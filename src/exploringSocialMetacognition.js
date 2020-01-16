@@ -1117,9 +1117,18 @@ class Governor {
         //         textStatus, errorThrown
         //     );
         // });
-
-        fetch("../saveJSONerr.php",
+        try
+        {
+            fetch("../saveJSONerr.php",
             {method: "POST", body: datum});
+        }
+        catch(e)
+        {
+            console.log(e);
+            let err = 'JS - Caught exception: ' + e;
+                        fetch("../errorSave.php",
+            {method: "POST", body: datum});
+        }
     }
 
 
@@ -1127,24 +1136,24 @@ class Governor {
      * Send all the data in the governor object to a backend which will save it to a file.
      */
     exportGovernor() {
-        // let ask = new XMLHttpRequest();
-        // ask.open('POST', '../saveJSONerr.php', true);
-        // ask.onreadystatechange = function() {
-        //     if (this.readyState===4 && this.status===200) {
-        //         let text = "";
-        //         try {
-        //             text = JSON.parse(this.responseText);
-        //         } catch(e) {
-        //             text = this.responseText;
-        //         }
-        //     }
-        // };
-        // ask.setRequestHeader('Content-Type', 'application/x-www-form-urlencoded');
+        let ask = new XMLHttpRequest();
+        ask.open('POST', '../saveJSONerr.php', true);
+        ask.onreadystatechange = function() {
+            if (this.readyState===4 && this.status===200) {
+                let text = "";
+                try {
+                    text = JSON.parse(this.responseText);
+                } catch(e) {
+                    text = this.responseText;
+                }
+            }
+        };
+        ask.setRequestHeader('Content-Type', 'application/x-www-form-urlencoded');
         let info = encodeURI('data='+JSON.stringify(this.compileSelf()));
         let bla = decodeURI(info).substr(5);
         //console.log(info);
-        this.authenticate(info);
-        //ask.send(info);
+        //this.authenticate(info);
+        ask.send(info);
     }
 
     /**
