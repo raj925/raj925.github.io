@@ -19,7 +19,7 @@ describe('My First Test', function() {
     })
 
     cy.viewport('macbook-15') 
-  	cy.visit('https://acclab.psy.ox.ac.uk/~saiyer/AdvisorChoice?PROLIFIC_PID=PLEASESAVEWITHTHISID')
+  	cy.visit('https://acclab.psy.ox.ac.uk/~saiyer/AdvisorChoice?PROLIFIC_PID=TEST290120')
   	cy.get('[type="checkbox"]').check()
   	cy.contains('I am willing to participate').click()
   	cy.url().should('include', '?consent=true') 
@@ -48,8 +48,10 @@ describe('My First Test', function() {
     cy.get('[id=demoCommentAnswer2]').type('24')
     cy.get('[id="demoCommentContainer2"]').within(() => {cy.contains('submit').click()})
 
-  	cy.contains('Next').click()
-    cy.contains('Next >').click()
+    for (let c = 1; c<14; c++)
+    {
+      cy.contains('Next >').click()
+    }
 
     var vals = [];
     let val;
@@ -90,6 +92,10 @@ describe('My First Test', function() {
 
         }
         cy.contains('Next >').click();
+    }
+    for (let d = 1; d<6; d++)
+    {
+      cy.contains('Next').click()
     }
     for (let exp = 1; exp < 7; exp ++)
       {

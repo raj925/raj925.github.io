@@ -172,7 +172,7 @@ class DotTask extends Governor {
                     {
                         larger = 1;
                     }
-                    algAns = ((forcedData.advisors[(this.dotDifference)-1].AlgorithmAnswer[id-1])-1);
+                    algAns = ((forcedData.advisors[(this.dotDifference)-1].AlgorithmAnswer[this.forcedTrials[0]])-1);
                     if (algAns == larger)
                     {
                         algCor = 1;
@@ -181,8 +181,8 @@ class DotTask extends Governor {
                     {
                         algCor = 0;
                     }
-                    algCon = ((forcedData.advisors[(this.dotDifference)-1].cj1[id-1])-1)
-
+                    algCon = ((forcedData.advisors[(this.dotDifference)-1].cj1[this.forcedTrials[0]])-1)
+ 
                 }
                 else if (trialType == 2)    
                 {
@@ -196,7 +196,7 @@ class DotTask extends Governor {
                     {
                         larger = 1;
                     }
-                    algAns = ((choiceData.advisors[(this.dotDifference)-1].AlgorithmAnswer[id-1])-1);
+                    algAns = ((choiceData.advisors[(this.dotDifference)-1].AlgorithmAnswer[this.choiceTrials[0]])-1);
                     if (algAns == larger)
                     {
                         algCor = 1;
@@ -205,7 +205,7 @@ class DotTask extends Governor {
                     {
                         algCor = 0;
                     }
-                    algCon = ((choiceData.advisors[(this.dotDifference)-1].cj1[id-1])-1)
+                    algCon = ((choiceData.advisors[(this.dotDifference)-1].cj1[this.choiceTrials[0]])-1)
                 }
                 else if (trialType == 5)    
                 {
@@ -219,7 +219,7 @@ class DotTask extends Governor {
                     {
                         larger = 1;
                     }
-                    algAns = ((blk4Data.advisors[(this.dotDifference)-1].AlgorithmAnswer[id-1])-1);
+                    algAns = ((blk4Data.advisors[(this.dotDifference)-1].AlgorithmAnswer[this.blk4Trials[0]])-1);
                     if (algAns == larger)
                     {
                         algCor = 1;
@@ -228,7 +228,7 @@ class DotTask extends Governor {
                     {
                         algCor = 0;
                     }
-                    algCon = ((blk4Data.advisors[(this.dotDifference)-1].cj1[id-1])-1)
+                    algCon = ((blk4Data.advisors[(this.dotDifference)-1].cj1[this.blk4Trials[0]])-1)
                 }
                 else
                 {
@@ -518,7 +518,14 @@ class DotTask extends Governor {
      */
     blockFeedback(){
         let block;
-        block = this.currentTrial.block-1;
+        if (this.currentTrial == null)
+        {
+            block = this.practiceBlockStructure.length-1;
+        }
+        else
+        {
+            block = this.currentTrial.block-1;
+        }
         // if (typeof this.currentTrial !== 'undefined')
         // {
         //     block = (this.trials[this.trials.length-1]).block-1;
@@ -532,6 +539,7 @@ class DotTask extends Governor {
                 answer = trial.answer[0];
             return answer === trial.whichSide;
         });
+
 
         let score = hitList.length / trialList.length * 100;
         // if (score < this. BlockScore) {
@@ -2046,9 +2054,8 @@ class AdvisorChoice extends DotTask {
      * the end of each completed trial. Since we don't get nice progress bar this way we may as well use on-the-fly
      * timeline tweaking. This may just be more work to duplicate jsPsych's capabilities, though
      */
-    getTrials() {
+    getTrials(section="experimental") {
         let trials = [];
-        let id = 0;
         let realId = 0;
         let advisorSets = this.advisorLists.length;
         let blockCount = this.blockStructure.length * advisorSets;
@@ -2059,158 +2066,45 @@ class AdvisorChoice extends DotTask {
         let choiceCount = 0;
         let blk4Count = 0;
         // Define trials
-        for (let b=0; b<practiceBlockCount+blockCount+this.blk4Structure.length; b++) {
-            let advisorSet = 0;
-            let advisor0id = null;
-            let advisor1id = null;
-            let blockStructure = null;
-            let advisorChoices = [];
-            let advisorForceDeck = null;
-            let advisorChangeDeck = null;
-            let advisorForceBlk4Deck = null;
-            let advisorBlk4Deck = null;
-            if (b >= practiceBlockCount) {
-                advisorSet = 0;
-                if (this.blk4Structure.length > 0 && b == 3)
-                {
-                    blockStructure = this.blk4Structure[(b-practiceBlockCount)%this.blockStructure.length];
-                }
-                else
-                {
-                    blockStructure = this.blockStructure[(b-practiceBlockCount)%this.blockStructure.length];
-                }
-                advisorChoices = this.advisorLists[advisorSet];
-            } else {
+        let advisorSet = 0;
+        let advisor0id = null;
+        let advisor1id = null;
+        let blockStructure = null;
+        let advisorChoices = [];
+        let advisorForceDeck = null;
+        let advisorChangeDeck = null;
+        let advisorForceBlk4Deck = null;
+        let advisorBlk4Deck = null;
+        if (section=="practice")
+        {
+            let id = 0;
+            for (let b=0; b<practiceBlockCount; b++) {
                 advisorSet = 0;
                 blockStructure = this.practiceBlockStructure[b];
                 advisorChoices = this.practiceAdvisors;
-            }
-            advisor0id = advisorChoices[0].adviceType % 2? advisorChoices[1].id : advisorChoices[0].id;
-            if(advisorChoices.length > 1)
-                advisor1id = advisorChoices[0].adviceType % 2? advisorChoices[0].id : advisorChoices[1].id;
-            else
-                advisor1id = advisor0id;
-            // Shuffle advisors so they appear an equal number of times
-            advisorForceDeck = utils.shuffleShoe(advisorChoices,
-                blockStructure[trialTypes.force]/advisorChoices.length);
-            advisorChangeDeck = utils.shuffleShoe(advisorChoices,
-                blockStructure[trialTypes.change]/advisorChoices.length);
-            advisorForceBlk4Deck = utils.shuffleShoe(advisorChoices,
-                blockStructure[trialTypes.forceblk4]);
-            let blockLength = utils.sumList(blockStructure);
-            // Work out what type of trial to be
-            let trialTypeDeck = [];
-            for (let tt=0; tt<Object.keys(trialTypes).length; tt++) {
-                for (let i=0; i<blockStructure[tt]; i++)
-                    trialTypeDeck.push(tt);
-            }
-            trialTypeDeck = utils.shuffle(trialTypeDeck);
-            for (let i=1; i<=blockLength; i++) {
-                id++;
-                let isPractice = b < practiceBlockCount;
-                let trialType = trialTypeDeck.pop();
-                let advisorId = 0;
-                let left;
-                let right;
-                let larger;
-                let algAns;
-                let algCor;
-                let algCon;
-                let trialSelect;
-                // Below we pull the advisor, dots and confidence used for this trial again.
-                // We merely do this for data recoridng purposes at the end of the experiment.
-                if (trialType == 1)
-                {
-                    trialSelect = this.forcedTrials[forcedCount];
-                    forcedCount++;
-                    if (trialSelect !== undefined)
-                    {
-                        left = (forcedWhereDots.dots[trialSelect+(120*(this.dotDifference-1))])[0];
-                        right = (forcedWhereDots.dots[trialSelect+(120*(this.dotDifference-1))])[1];
-                        // Is the left or right larger?
-                        if (utils.sumList(left,false,true) > utils.sumList(right,false,true))
-                        {
-                            larger = 0;
-                        }
-                        else
-                        {
-                            larger = 1;
-                        }
-                    }
-                    else
-                    {
-                        larger = 0;
-                    }
-                    algAns = ((forcedData.advisors[(this.dotDifference)-1].AlgorithmAnswer[trialSelect])-1);
-                    if (algAns == larger)
-                    {
-                        algCor = 1;
-                    }
-                    else
-                    {
-                        algCor = 0;
-                    }
-                    // algCon = ((forcedData.advisors[(this.dotDifference)-1].cj1[trialSelect-1])-1)
+                let blockLength = utils.sumList(blockStructure);
+                // Work out what type of trial to be
+                let trialTypeDeck = [];
+                for (let tt=0; tt<Object.keys(trialTypes).length; tt++) {
+                    for (let i=0; i<blockStructure[tt]; i++)
+                        trialTypeDeck.push(tt);
                 }
-                else if (trialType == 2)    
+                trialTypeDeck = utils.shuffle(trialTypeDeck);
+                for (let i=1; i<=blockLength; i++) 
                 {
-                    trialSelect = this.choiceTrials[choiceCount];
-                    choiceCount++;
-                    if (trialSelect !== undefined)
-                    {
-                        left = (choiceWhereDots.dots[trialSelect+(240*(this.dotDifference-1))])[0];
-                        right = (choiceWhereDots.dots[trialSelect+(240*(this.dotDifference-1))])[1];
-                        if (utils.sumList(left,false,true) > utils.sumList(right,false,true))
-                        {
-                            larger = 0;
-                        }
-                        else
-                        {
-                            larger = 1;
-                        }
-                    }
-                    else
-                    {
-                        larger = 0;
-                    }
-                    algAns = ((choiceData.advisors[(this.dotDifference)-1].AlgorithmAnswer[trialSelect])-1);
-                    if (algAns == larger)
-                    {
-                        algCor = 1;
-                    }
-                    else
-                    {
-                        algCor = 0;
-                    }
-                    // algCon = ((choiceData.advisors[(this.dotDifference)-1].cj1[trialSelect-1])-1)
-                }
-                else if (trialType == 5)    
-                {
-                    trialSelect = this.blk4Trials[blk4Count];
-                    blk4Count++;
-                    left = (blk4WhereDots.dots[trialSelect+(60*(this.dotDifference-1))])[0];
-                    right = (blk4WhereDots.dots[trialSelect+(60*(this.dotDifference-1))])[1];
-                    if (utils.sumList(left,false,true) > utils.sumList(right,false,true))
-                    {
-                        larger = 0;
-                    }
-                    else
-                    {
-                        larger = 1;
-                    }
-                    algAns = ((blk4Data.advisors[(this.dotDifference)-1].AlgorithmAnswer[trialSelect])-1);
-                    if (algAns == larger)
-                    {
-                        algCor = 1;
-                    }
-                    else
-                    {
-                        algCor = 0;
-                    }
-                    // algCon = ((blk4Data.advisors[(this.dotDifference)-1].cj1[trialSelect-1])-1)
-                }
-                else
-                {
+                    id++;
+                    let isPractice = true;
+                    let trialType = trialTypeDeck.pop();
+                    let advisorId = 0;
+                    let left;
+                    let right;
+                    let larger;
+                    let algAns;
+                    let algCor;
+                    let algCon;
+                    let trialSelect;
+                    // Below we pull the advisor, dots and confidence used for this trial again.
+                    // We merely do this for data recoridng purposes at the end of the experiment.
                     left = null;
                     right = null;
                     larger = null;
@@ -2218,62 +2112,253 @@ class AdvisorChoice extends DotTask {
                     algCor = null;
                     algCon = null;
                     trialSelect = null;
-                }
-                if (isPractice)
-                {
                     advisorId = trialType===trialTypes.catch? 0 : this.practiceAdvisor.id;
+                    let defaultAdvisor = trialType === trialTypes.change? advisorChangeDeck.pop().id : null;
+                    let changes = trialType === trialTypes.change? 0 : null;
+                    let r = Math.random() < .5? 1 : 0;
+                    let choice = trialType === trialTypes.choice? [advisorChoices[r].id, advisorChoices[1-r].id] : [];
+                    // let choice = isPractice? [] : [advisorChoices[r].id, advisorChoices[1-r].id];
+                    trials.push(new Trial(id, {
+                        type: trialType,
+                        typeName: trialTypeNames[trialType],
+                        block: b,
+                        advisorSet,
+                        defaultAdvisor,
+                        advisorId,
+                        advisor0id,
+                        advisor1id,
+                        choice,
+                        changes,
+                        answer: [NaN, NaN],
+                        confidence: [NaN, NaN],
+                        getCorrect: function(finalAnswer = true) {
+                            let answer = finalAnswer? this.answer[1] : this.answer[0];
+                            return answer === this.whichSide;
+                        },
+                        whichSide: isPractice? Math.round(Math.random()) : whichSideDeck[realId],
+                        practice: isPractice,
+                        feedback: isPractice,
+                        warnings: [],
+                        stimulusDrawTime: [],
+                        stimulusOffTime: [],
+                        fixationDrawTime: [],
+                        advisorAnswer: algAns,
+                        advisorCorrect: algCor,
+                        //advisorConfidence: algCon,
+                        advisorConfidence: 0,
+                        leftGrid: left,
+                        rightGrid: right,
+                        whereLarger: larger,
+                        trialSelect: trialSelect
+                    }));
+                    if (!isPractice)
+                        realId++;
                 }
-                else if (trialType===trialTypes.forceblk4)
+            }
+        }
+        else
+        {
+            let id = (practiceBlockCount*this.practiceBlockStructure[0]["0"]);
+            for (let b=0; b<blockCount+this.blk4Structure.length; b++) {
+                advisorSet = 0;
+                if (this.blk4Structure.length > 0 && b == 0)
                 {
-                    advisorId = advisorForceBlk4Deck.pop().id;
+                    blockStructure = this.blk4Structure[0%this.blockStructure.length];
                 }
                 else
                 {
-                    advisorId = trialType === trialTypes.force? advisorForceDeck.pop().id : 0;
+                    blockStructure = this.blockStructure[0%this.blockStructure.length];
                 }
-                let defaultAdvisor = trialType === trialTypes.change? advisorChangeDeck.pop().id : null;
-                let changes = trialType === trialTypes.change? 0 : null;
-                let r = Math.random() < .5? 1 : 0;
-                let choice = trialType === trialTypes.choice? [advisorChoices[r].id, advisorChoices[1-r].id] : [];
-                // let choice = isPractice? [] : [advisorChoices[r].id, advisorChoices[1-r].id];
-                trials.push(new Trial(id, {
-                    type: trialType,
-                    typeName: trialTypeNames[trialType],
-                    block: b,
-                    advisorSet,
-                    defaultAdvisor,
-                    advisorId,
-                    advisor0id,
-                    advisor1id,
-                    choice,
-                    changes,
-                    answer: [NaN, NaN],
-                    confidence: [NaN, NaN],
-                    getCorrect: function(finalAnswer = true) {
-                        let answer = finalAnswer? this.answer[1] : this.answer[0];
-                        return answer === this.whichSide;
-                    },
-                    whichSide: isPractice? Math.round(Math.random()) : whichSideDeck[realId],
-                    practice: isPractice,
-                    feedback: isPractice,
-                    warnings: [],
-                    stimulusDrawTime: [],
-                    stimulusOffTime: [],
-                    fixationDrawTime: [],
-                    advisorAnswer: algAns,
-                    advisorCorrect: algCor,
-                    //advisorConfidence: algCon,
-                    advisorConfidence: 0,
-                    leftGrid: left,
-                    rightGrid: right,
-                    whereLarger: larger,
-                    trialSelect: trialSelect
-                }));
-                if (!isPractice)
-                    realId++;
+                advisorChoices = this.advisorLists[advisorSet];
+                advisor0id = advisorChoices[0].adviceType % 2? advisorChoices[1].id : advisorChoices[0].id;
+                if(advisorChoices.length > 1)
+                    advisor1id = advisorChoices[0].adviceType % 2? advisorChoices[0].id : advisorChoices[1].id;
+                else
+                    advisor1id = advisor0id;
+                // Shuffle advisors so they appear an equal number of times
+                advisorForceDeck = utils.shuffleShoe(advisorChoices,
+                    blockStructure[trialTypes.force]/advisorChoices.length);
+                advisorChangeDeck = utils.shuffleShoe(advisorChoices,
+                    blockStructure[trialTypes.change]/advisorChoices.length);
+                advisorForceBlk4Deck = utils.shuffleShoe(advisorChoices,
+                    blockStructure[trialTypes.forceblk4]);
+                let blockLength = utils.sumList(blockStructure);
+                // Work out what type of trial to be
+                let trialTypeDeck = [];
+                for (let tt=0; tt<Object.keys(trialTypes).length; tt++) {
+                    for (let i=0; i<blockStructure[tt]; i++)
+                        trialTypeDeck.push(tt);
+                }
+                trialTypeDeck = utils.shuffle(trialTypeDeck);
+                for (let i=1; i<=blockLength; i++) {
+                    id++;
+                    let isPractice = false;
+                    let trialType = trialTypeDeck.pop();
+                    let advisorId = 0;
+                    let left;
+                    let right;
+                    let larger;
+                    let algAns;
+                    let algCor;
+                    let algCon;
+                    let trialSelect;
+                    // Below we pull the advisor, dots and confidence used for this trial again.
+                    // We merely do this for data recoridng purposes at the end of the experiment.
+                    if (trialType == 1)
+                    {
+                        trialSelect = this.forcedTrials[forcedCount];
+                        forcedCount++;
+                        if (trialSelect !== undefined)
+                        {
+                            left = (forcedWhereDots.dots[trialSelect+(120*(this.dotDifference-1))])[0];
+                            right = (forcedWhereDots.dots[trialSelect+(120*(this.dotDifference-1))])[1];
+                            // Is the left or right larger?
+                            if (utils.sumList(left,false,true) > utils.sumList(right,false,true))
+                            {
+                                larger = 0;
+                            }
+                            else
+                            {
+                                larger = 1;
+                            }
+                        }
+                        else
+                        {
+                            larger = 0;
+                        }
+                        algAns = ((forcedData.advisors[(this.dotDifference)-1].AlgorithmAnswer[trialSelect])-1);
+                        if (algAns == larger)
+                        {
+                            algCor = 1;
+                        }
+                        else
+                        {
+                            algCor = 0;
+                        }
+                        // algCon = ((forcedData.advisors[(this.dotDifference)-1].cj1[trialSelect-1])-1)
+                    }
+                    else if (trialType == 2)    
+                    {
+                        trialSelect = this.choiceTrials[choiceCount];
+                        choiceCount++;
+                        if (trialSelect !== undefined)
+                        {
+                            left = (choiceWhereDots.dots[trialSelect+(240*(this.dotDifference-1))])[0];
+                            right = (choiceWhereDots.dots[trialSelect+(240*(this.dotDifference-1))])[1];
+                            if (utils.sumList(left,false,true) > utils.sumList(right,false,true))
+                            {
+                                larger = 0;
+                            }
+                            else
+                            {
+                                larger = 1;
+                            }
+                        }
+                        else
+                        {
+                            larger = 0;
+                        }
+                        algAns = ((choiceData.advisors[(this.dotDifference)-1].AlgorithmAnswer[trialSelect])-1);
+                        if (algAns == larger)
+                        {
+                            algCor = 1;
+                        }
+                        else
+                        {
+                            algCor = 0;
+                        }
+                        // algCon = ((choiceData.advisors[(this.dotDifference)-1].cj1[trialSelect-1])-1)
+                    }
+                    else if (trialType == 5)    
+                    {
+                        trialSelect = this.blk4Trials[blk4Count];
+                        blk4Count++;
+                        left = (blk4WhereDots.dots[trialSelect+(60*(this.dotDifference-1))])[0];
+                        right = (blk4WhereDots.dots[trialSelect+(60*(this.dotDifference-1))])[1];
+                        if (utils.sumList(left,false,true) > utils.sumList(right,false,true))
+                        {
+                            larger = 0;
+                        }
+                        else
+                        {
+                            larger = 1;
+                        }
+                        algAns = ((blk4Data.advisors[(this.dotDifference)-1].AlgorithmAnswer[trialSelect])-1);
+                        if (algAns == larger)
+                        {
+                            algCor = 1;
+                        }
+                        else
+                        {
+                            algCor = 0;
+                        }
+                        // algCon = ((blk4Data.advisors[(this.dotDifference)-1].cj1[trialSelect-1])-1)
+                    }
+                    else
+                    {
+                        left = null;
+                        right = null;
+                        larger = null;
+                        algAns = null;
+                        algCor = null;
+                        algCon = null;
+                        trialSelect = null;
+                    }
+                    if (isPractice)
+                    {
+                        advisorId = trialType===trialTypes.catch? 0 : this.practiceAdvisor.id;
+                    }
+                    else if (trialType===trialTypes.forceblk4)
+                    {
+                        advisorId = advisorForceBlk4Deck.pop().id;
+                    }
+                    else
+                    {
+                        advisorId = trialType === trialTypes.force? advisorForceDeck.pop().id : 0;
+                    }
+                    let defaultAdvisor = trialType === trialTypes.change? advisorChangeDeck.pop().id : null;
+                    let changes = trialType === trialTypes.change? 0 : null;
+                    let r = Math.random() < .5? 1 : 0;
+                    let choice = trialType === trialTypes.choice? [advisorChoices[r].id, advisorChoices[1-r].id] : [];
+                    // let choice = isPractice? [] : [advisorChoices[r].id, advisorChoices[1-r].id];
+                    trials.push(new Trial(id, {
+                        type: trialType,
+                        typeName: trialTypeNames[trialType],
+                        block: b+practiceBlockCount,
+                        advisorSet,
+                        defaultAdvisor,
+                        advisorId,
+                        advisor0id,
+                        advisor1id,
+                        choice,
+                        changes,
+                        answer: [NaN, NaN],
+                        confidence: [NaN, NaN],
+                        getCorrect: function(finalAnswer = true) {
+                            let answer = finalAnswer? this.answer[1] : this.answer[0];
+                            return answer === this.whichSide;
+                        },
+                        whichSide: larger,
+                        practice: isPractice,
+                        feedback: isPractice,
+                        warnings: [],
+                        stimulusDrawTime: [],
+                        stimulusOffTime: [],
+                        fixationDrawTime: [],
+                        advisorAnswer: algAns,
+                        advisorCorrect: algCor,
+                        //advisorConfidence: algCon,
+                        advisorConfidence: 0,
+                        leftGrid: left,
+                        rightGrid: right,
+                        whereLarger: larger,
+                        trialSelect: trialSelect
+                    }));
+                    if (!isPractice)
+                        realId++;
+                }
             }
         }
-        console.log(trials)
         return trials;
     }
 

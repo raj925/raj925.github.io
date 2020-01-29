@@ -29,7 +29,7 @@ with open(aggregateFilename, mode='w') as dataOut:
     
     # Update the below row to change the column headers for aggregate data file.
     # Make sure the order and length matches the variables added on each row in the last line of this script (ie csv_writer.writerow([...]))
-    csv_writer.writerow(['Participant ID', 'Gender', 'Age', 'Device Use', 'Final Dot Difference', 'Choice of Human', 'Choice of Algorithm', 'Preference Strength', 'Cj1 Mean Resolution', 'Cj2 Mean Resolution', 'Mean Cj1 Accuracy', 'Mean Cj2 Accuracy', 'Sway of Human Advice', 'Sway of Algor Advice', 'Mean RT1', 'Mean RT2', 'Mean CTC', 'AccQuant1', 'AccQuant2', 'AccQuant3', 'AccQuant4', 'AdvQuant1', 'AdvQuant2', 'AdvQuant3', 'AdvQuant4', 'CjQuant1', 'CjQuant2', 'CjQuant3', 'CjQuant4', 'Mean Cj1', 'Mean Cj2', 'Human Agreed %', 'Algor Agreed %', 'Algor Agreed % Diff', 'Human Agreed Conf Diff', 'Algor Agreed Conf Diff', 'Human Disagreed Conf Diff', 'Algor Disagreed Conf Diff', 'Algor Relative Influence'])
+    csv_writer.writerow(['Participant ID', 'Gender', 'Age', 'Device Use', 'Final Dot Difference', 'Choice of Human', 'Choice of Algorithm', 'Preference Strength', 'Max Cj', 'Min Cj', 'Cj Range', 'Num of Unique Cj Values', 'Cj1 Mean Resolution', 'Cj2 Mean Resolution', 'Mean Cj1 Accuracy', 'Mean Cj2 Accuracy', 'Sway of Human Advice', 'Sway of Algor Advice', 'Mean RT1', 'Mean RT2', 'Mean CTC', 'AccQuant1', 'AccQuant2', 'AccQuant3', 'AccQuant4', 'AdvQuant1', 'AdvQuant2', 'AdvQuant3', 'AdvQuant4', 'CjQuant1', 'CjQuant2', 'CjQuant3', 'CjQuant4', 'Mean Cj1', 'Mean Cj2', 'Human Agreed %', 'Algor Agreed %', 'Algor Agreed % Diff', 'Human Agreed Conf Diff', 'Algor Agreed Conf Diff', 'Human Disagreed Conf Diff', 'Algor Disagreed Conf Diff', 'Algor Relative Influence'])
 
     # For all individual participant files (which jsonConvert names in the form TRIALS.csv)
     for file in glob.glob("*TRIALS.csv"):
@@ -92,11 +92,17 @@ with open(aggregateFilename, mode='w') as dataOut:
                 algorChoice = len(df.loc[(df["trialType"] == "choice") & (df["whichAdvisor"] == 1)])/choiceNum
                 humanChoice = 1 - algorChoice
 
+                maxCj = np.max(abs(cj1Orig));
+                minCj = np.min(abs(cj1Orig));
+                cjRange = maxCj - minCj;
+                numOfCjVals = len(np.unique(abs(cj1Orig)))
+
                 # Resolution is the difference in average confidence during correct and error trials.
                 # Computer separately pre and post advice.
                 resolution = np.mean(cj1.loc[df["cor1"] == 1]) - np.mean(cj1.loc[df["cor1"] == 0])
                 resolution2 = np.mean(cj2.loc[df["cor2"] == 1]) - np.mean(cj2.loc[df["cor2"] == 0])
-                meanCor1 = np.mean(cor1)
+                meanCor1 = np.sum(cor1)/(choiceNum+forceNum)
+                print(meanCor1)
                 meanCor2 = np.mean(cor2)
                 humanSway = np.mean(cj2Orig.loc[df["whichAdvisor"] == 1] - cj1Orig.loc[df["whichAdvisor"] == 1])
                 algorSway = np.mean(cj2Orig.loc[df["whichAdvisor"] == 2] - cj1Orig.loc[df["whichAdvisor"] == 2])
@@ -232,7 +238,7 @@ with open(aggregateFilename, mode='w') as dataOut:
                 algorDisagreedConfDiff = round(algorDisagreedConfDiff, 3)
                 algorRelativeInfluence = round(algorRelativeInfluence, 3)
                                                                                                                           
-                csv_writer.writerow([pid, gender, age, deviceUse, finalDD, algorChoice, humanChoice, preferenceStrength, resolution, resolution2, meanCor1, meanCor2, humanSway, algorSway, meanRt1, meanRt2, meanCtc, accQuant1, accQuant2, accQuant3, accQuant4, advQuant1, advQuant2, advQuant3, advQuant4, cjQuant1, cjQuant2, cjQuant3, cjQuant4, meanCj1, meanCj2, humanAgreedPercent, algorAgreedPercent, agreedDiff, humanAgreedConfDiff, algorAgreedConfDiff, humanDisagreedConfDiff, algorDisagreedConfDiff, algorRelativeInfluence])
+                csv_writer.writerow([pid, gender, age, deviceUse, finalDD, algorChoice, humanChoice, preferenceStrength, maxCj, minCj, cjRange, numOfCjVals, resolution, resolution2, meanCor1, meanCor2, humanSway, algorSway, meanRt1, meanRt2, meanCtc, accQuant1, accQuant2, accQuant3, accQuant4, advQuant1, advQuant2, advQuant3, advQuant4, cjQuant1, cjQuant2, cjQuant3, cjQuant4, meanCj1, meanCj2, humanAgreedPercent, algorAgreedPercent, agreedDiff, humanAgreedConfDiff, algorAgreedConfDiff, humanDisagreedConfDiff, algorDisagreedConfDiff, algorRelativeInfluence])
 
             except Exception as e:
                 print(str(e))
