@@ -10,19 +10,39 @@
 import json
 import csv
 import glob, os
+import sys
 
 # Stay in the current directory
-os.chdir("./JSONS")
+currentDir = os.path.dirname(sys.argv[0])
+currentDir = currentDir + "/JSONs"
+os.chdir(currentDir)
 
 logf = open("jsonConvertLog.txt", "w+")
 
 # For all json files in the current directory
 # No need to worry about the same json file being processed twice.
-for file in glob.glob("*.json"):
+recentFiles = []
+for subdir, dirs, files in os.walk("./"):
+    for di in dirs:
+        if (di[0] != "_"):
+            lookin = "./" + di
+            for jsonsubdir, jsondirs, jsonfiles in os.walk(lookin):
+                dirTimes = []
+                for jsonfile in jsonfiles:
+                    jsonfilename = jsonfile.split("_")
+                    time = jsonfilename[3] + jsonfilename[4] + jsonfilename[5]
+                    time = int(float(time))
+                    dirTimes.append(time)
+            recentfile = str(max(dirTimes))
+            recentfile = "./" + di + "/" + jsonfilename[0] + "_" + jsonfilename[1] + "_" + jsonfilename[2] + "_" + recentfile[0:2] + "_" + recentfile[2:4] + "_" + recentfile[4:6] + "_" + jsonfilename[6]
+            recentFiles.append(recentfile)
+
+for file in recentFiles:
     surveyData = [[],[],[],[]]
     questions = [[],[],[],[]]
     try:
         filename = file.split("_")
+        filename[0] = ((filename[0]).split("/"))[2]
         
         # Get the data of this participant's experiment from the filename (DD/MM/YYYY)
         date = filename[2] + "/" + filename[1] + "/" + filename[0]
@@ -36,9 +56,8 @@ for file in glob.glob("*.json"):
         txt = txt.replace('}",','},')
 
         # We change the JSON as above and then rewrite the JSON file with the cleaned-up version.
-        f = open(file,"w")
-        f.write(txt)
-        f.close()
+        with open(file, mode='w') as json_file:
+            json_file.write(txt)
 
         # Main python function for intepreting JSON data. Won't work without the cleanup above.
         dataJson = json.loads(txt)

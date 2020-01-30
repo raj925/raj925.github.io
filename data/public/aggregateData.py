@@ -16,9 +16,12 @@ import csv
 import glob, os
 import numpy as np
 import fnmatch
+import sys
 
 # Set directory and filename to save csv file to.
-os.chdir("./Trials")
+currentDir = os.path.dirname(sys.argv[0])
+currentDir = currentDir + "/Trials"
+os.chdir(currentDir)
 aggregateFilename = "../allSubjects.csv"
 
 logf = open("aggregateDataLog.txt", "w+")
@@ -29,7 +32,7 @@ with open(aggregateFilename, mode='w') as dataOut:
     
     # Update the below row to change the column headers for aggregate data file.
     # Make sure the order and length matches the variables added on each row in the last line of this script (ie csv_writer.writerow([...]))
-    csv_writer.writerow(['Participant ID', 'Gender', 'Age', 'Device Use', 'Final Dot Difference', 'Choice of Human', 'Choice of Algorithm', 'Preference Strength', 'Max Cj', 'Min Cj', 'Cj Range', 'Num of Unique Cj Values', 'Cj1 Mean Resolution', 'Cj2 Mean Resolution', 'Mean Cj1 Accuracy', 'Mean Cj2 Accuracy', 'Sway of Human Advice', 'Sway of Algor Advice', 'Mean RT1', 'Mean RT2', 'Mean CTC', 'AccQuant1', 'AccQuant2', 'AccQuant3', 'AccQuant4', 'AdvQuant1', 'AdvQuant2', 'AdvQuant3', 'AdvQuant4', 'CjQuant1', 'CjQuant2', 'CjQuant3', 'CjQuant4', 'Mean Cj1', 'Mean Cj2', 'Human Agreed %', 'Algor Agreed %', 'Algor Agreed % Diff', 'Human Agreed Conf Diff', 'Algor Agreed Conf Diff', 'Human Disagreed Conf Diff', 'Algor Disagreed Conf Diff', 'Algor Relative Influence'])
+    csv_writer.writerow(['Participant ID', 'Gender', 'Age', 'Device Use', 'Final Dot Difference', 'Choice of Human', 'Choice of Algorithm', 'Preference Strength', 'Max Cj', 'Min Cj', 'Cj Range', 'Num of Unique Cj Values', 'Advice Ignored Trials', 'Cj1 Mean Resolution', 'Cj2 Mean Resolution', 'Mean Cj1 Accuracy', 'Mean Cj2 Accuracy', 'Sway of Human Advice', 'Sway of Algor Advice', 'Mean RT1', 'Mean RT2', 'Mean CTC', 'AccQuant1', 'AccQuant2', 'AccQuant3', 'AccQuant4', 'AdvQuant1', 'AdvQuant2', 'AdvQuant3', 'AdvQuant4', 'CjQuant1', 'CjQuant2', 'CjQuant3', 'CjQuant4', 'Mean Cj1', 'Mean Cj2', 'Human Agreed %', 'Algor Agreed %', 'Algor Agreed % Diff', 'Human Agreed Conf Diff', 'Algor Agreed Conf Diff', 'Human Disagreed Conf Diff', 'Algor Disagreed Conf Diff', 'Algor Relative Influence'])
 
     # For all individual participant files (which jsonConvert names in the form TRIALS.csv)
     for file in glob.glob("*TRIALS.csv"):
@@ -96,6 +99,7 @@ with open(aggregateFilename, mode='w') as dataOut:
                 minCj = np.min(abs(cj1Orig));
                 cjRange = maxCj - minCj;
                 numOfCjVals = len(np.unique(abs(cj1Orig)))
+                adviceIgnoredTrials = len(df.loc[(df["cj1"] == df["cj2"]) & (df["int1"] == df["int2"])])
 
                 # Resolution is the difference in average confidence during correct and error trials.
                 # Computer separately pre and post advice.
@@ -238,7 +242,7 @@ with open(aggregateFilename, mode='w') as dataOut:
                 algorDisagreedConfDiff = round(algorDisagreedConfDiff, 3)
                 algorRelativeInfluence = round(algorRelativeInfluence, 3)
                                                                                                                           
-                csv_writer.writerow([pid, gender, age, deviceUse, finalDD, algorChoice, humanChoice, preferenceStrength, maxCj, minCj, cjRange, numOfCjVals, resolution, resolution2, meanCor1, meanCor2, humanSway, algorSway, meanRt1, meanRt2, meanCtc, accQuant1, accQuant2, accQuant3, accQuant4, advQuant1, advQuant2, advQuant3, advQuant4, cjQuant1, cjQuant2, cjQuant3, cjQuant4, meanCj1, meanCj2, humanAgreedPercent, algorAgreedPercent, agreedDiff, humanAgreedConfDiff, algorAgreedConfDiff, humanDisagreedConfDiff, algorDisagreedConfDiff, algorRelativeInfluence])
+                csv_writer.writerow([pid, gender, age, deviceUse, finalDD, algorChoice, humanChoice, preferenceStrength, maxCj, minCj, cjRange, numOfCjVals, adviceIgnoredTrials, resolution, resolution2, meanCor1, meanCor2, humanSway, algorSway, meanRt1, meanRt2, meanCtc, accQuant1, accQuant2, accQuant3, accQuant4, advQuant1, advQuant2, advQuant3, advQuant4, cjQuant1, cjQuant2, cjQuant3, cjQuant4, meanCj1, meanCj2, humanAgreedPercent, algorAgreedPercent, agreedDiff, humanAgreedConfDiff, algorAgreedConfDiff, humanDisagreedConfDiff, algorDisagreedConfDiff, algorRelativeInfluence])
 
             except Exception as e:
                 print(str(e))
