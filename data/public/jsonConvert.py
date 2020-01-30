@@ -116,44 +116,56 @@ for file in recentFiles:
             subject_writer = csv.writer(trials_file, delimiter=',', quotechar='"', quoting=csv.QUOTE_MINIMAL)
 
             # Write column headers in order. Make sure this matches the order of data below in subject_writer.writerow([currentTrial["id"]....
-            subject_writer.writerow(['trialNumber', 'block', 'staircase', 'wherelarger', 'dotdifference', 'int1', 'cj1', 'cor1', 'int2', 'cj2', 'cor2', 'trialType', 'whichAdvisor', 'advAnswer', 'advCorrect', 'advConfidence', 'rt1', 'rt2', 'ctcTime'])
+            subject_writer.writerow(['trialNumber', 'block', 'staircase', 'wherelarger', 'dotdifference', 'int1', 'cj1', 'cor1', 'int2', 'cj2', 'cor2', 'trialType', 'whichAdvisor', 'whereChoice', 'advAnswer', 'advCorrect', 'advConfidence', 'rt1', 'rt2', 'ctcTime'])
             for f in range(0,len(trials)):
                 currentTrial = trials[f]
-
+                
                 # We check the correctness of each trial manually by comparing ppt answer with correct answer.
-                if currentTrial["initialAnswer"] is not None:
-                    if currentTrial["initialAnswer"] == currentTrial["correctAnswer"]:
-                        cor1 = 1
+                #if currentTrial["initialAnswer"] is not None:
+                if currentTrial["initialAnswer"] == currentTrial["correctAnswer"]:
+                    cor1 = 1
+                else:
+                    cor1 = 0
+
+                # We don't have cor2 for the first few blocks where no advice is given.
+                if currentTrial["finalAnswer"] is None:
+                    cor2 = None
+                elif currentTrial["finalAnswer"] == currentTrial["correctAnswer"]:
+                    cor2 = 1
+                else:
+                    cor2 = 0
+
+                # Get advisor choice (top or bottom)
+                if currentTrial["hasChoice"]:
+                    choices = currentTrial["choice0"]
+                    chosen = currentTrial["advisorId"]
+                    if (chosen == choices):
+                        whereChoice = 1
                     else:
-                        cor1 = 0
+                        whereChoice = 2
+                else:
+                    whereChoice = 0
+                
 
-                    # We don't have cor2 for the first few blocks where no advice is given.
-                    if currentTrial["finalAnswer"] is None:
-                        cor2 = None
-                    elif currentTrial["finalAnswer"] == currentTrial["correctAnswer"]:
-                        cor2 = 1
-                    else:
-                        cor2 = 0
+                # Response time calculations (from ms to seconds)
+                try:
+                    rt1 = currentTrial["timeInitialResponse"]-currentTrial["timeInitialStimOff"]
+                    rt1 = round((rt1/1000), 2)
+                    rt2 = currentTrial["timeFinalResponse"]-currentTrial["timeFinalStart"]
+                    rt2 = round((rt2/1000), 2)
+                    ctcTime = currentTrial["timeFinalResponse"] - currentTrial["timeInitialResponse"]
+                    ctcTime = round((ctcTime/1000), 2)
+                except:
+                    rt2 = None
+                    ctcTime = None
 
-                    # Response time calculations (from ms to seconds)
-                    try:
-                        rt1 = currentTrial["timeInitialResponse"]-currentTrial["timeInitialStimOff"]
-                        rt1 = round((rt1/1000), 2)
-                        rt2 = currentTrial["timeFinalResponse"]-currentTrial["timeFinalStart"]
-                        rt2 = round((rt2/1000), 2)
-                        ctcTime = currentTrial["timeFinalResponse"] - currentTrial["timeInitialResponse"]
-                        ctcTime = round((ctcTime/1000), 2)
-                    except:
-                        rt2 = None
-                        ctcTime = None
+                if currentTrial["advisorAnswer"] == currentTrial["correctAnswer"]:
+                    advCorrect = 1
+                else:
+                    advCorrect = 0
 
-                    if currentTrial["advisorAnswer"] == currentTrial["correctAnswer"]:
-                        advCorrect = 1
-                    else:
-                        advCorrect = 0
-
-                    # Write our data one trial at a time to the row.
-                    subject_writer.writerow([currentTrial["id"], currentTrial["block"]+1, currentTrial["practice"], currentTrial["correctAnswer"], currentTrial["dotDifference"], currentTrial["initialAnswer"], currentTrial["initialConfidence"], cor1, currentTrial["finalAnswer"], currentTrial["finalConfidence"], cor2, currentTrial["typeName"], currentTrial["advisorId"], currentTrial["advisorAnswer"], advCorrect, currentTrial["advisorConfidence"], rt1, rt2, ctcTime])
+                # Write our data one trial at a time to the row.
+                subject_writer.writerow([currentTrial["id"], currentTrial["block"]+1, currentTrial["practice"], currentTrial["correctAnswer"], currentTrial["dotDifference"], currentTrial["initialAnswer"], currentTrial["initialConfidence"], cor1, currentTrial["finalAnswer"], currentTrial["finalConfidence"], cor2, currentTrial["typeName"], currentTrial["advisorId"], whereChoice, currentTrial["advisorAnswer"], advCorrect, currentTrial["advisorConfidence"], rt1, rt2, ctcTime])
 
     except Exception as e:
         error = "Error in File: " + file
