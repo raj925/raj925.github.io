@@ -972,6 +972,7 @@ class Trial {
         this.leftGrid = typeof args.leftGrid === 'undefined'? null: args.leftGrid;
         this.rightGrid = typeof args.rightGrid === 'undefined'? null: args.rightGrid;
         this.whereLarger = typeof args.whereLarger ==='undefined'? null: args.whereLarger;
+        this.points = typeof args.points ==='undefined'? null: args.points;
 
     }
 

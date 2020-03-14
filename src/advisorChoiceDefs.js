@@ -42,6 +42,7 @@ const trialTypeNames = {
 const permForced = utils.randPerm(120);
 const permChoice = utils.randPerm(240);
 const permBlk4 = utils.randPerm(60);
+let points = 0;
 
 /**
  * @classdesc A dot task governor controls the dot display experiment functionality
@@ -542,13 +543,17 @@ class DotTask extends Governor {
 
 
         let score = hitList.length / trialList.length * 100;
+        let trial = this.trials[this.currentTrialIndex-1];
         // if (score < this. BlockScore) {
         //     this.terminateExperiment(score);
         //     return;
         // }
         let div = document.querySelector('#jspsych-content');
         let p = div.insertBefore(document.createElement('p'), div.querySelector('p'));
-        p.innerText = "Your score on the last block was " + (Math.round(score*100)/100).toString() + "%.";
+        p.innerHTML = "Your score on the last block was " + (Math.round(score*100)/100).toString() + "%.";
+        p.innerHTML = p.innerHTML + "<br />" + "Your confidence points total is " + trial.points;
+        // let point = document.querySelector(".confidence-points-text p")
+        // point.style = "display: none";
         this.drawProgressBar();
         this.exportGovernor();
     }
@@ -1844,6 +1849,30 @@ class DotTask extends Governor {
         return cc;
     }
 
+    pointsTotal(points) {
+        let ele = document.querySelector(".confidence-points-text");
+        if (ele == null)
+        {
+            let ctx = document.querySelector('body');
+            //let tr = ctx.appendChild(document.createElement('tr'));
+            let tr = ctx.insertBefore(document.createElement('tr'),document.querySelector(".jspsych-content-wrapper"))
+            tr.className = "confidence-points-table";
+            tr.style = "align-self: center";
+            let th = tr.appendChild(document.createElement('th'));
+            th.className = "confidence-points-text";
+            let p = th.appendChild(document.createElement('p'));
+            let text = "Current Points: " + points.toString();
+            p.style = "margin-block-start: 0em; margin-block-end: 0em";
+            p.innerText = text;
+        }
+        else
+        {
+            let p = document.querySelector(".confidence-points-text p")
+            p.style = "margin-block-start: 0em; margin-block-end: 0em; display: block";
+            p.innerText = "Current Points: " + points.toString();
+        }
+    }
+
     /**
      * Show feedback for the current trial.
      * Called by jspsych-canvas-sliders-response
@@ -2746,6 +2775,20 @@ class AdvisorChoice extends DotTask {
                 var audio = new Audio(this.audioSrc);
                 audio.play();
             }
+            let correct;
+            let conf = (this.currentTrial.confidence[0]+50)/100;
+            if (answer !== this.currentTrial.whichSide)
+            {
+                correct = 0;
+            }
+            else
+            {
+                correct = 1;
+            }
+            points = Math.round(points + (100*(1 - Math.pow((correct - conf),2))));
+            //this.pointsTotal(points);
+            this.currentTrial.points = points;
+            console.log(this.currentTrial.points);
             this.closeTrial(trial);
             return;
         }
@@ -2852,9 +2895,10 @@ class AdvisorChoice extends DotTask {
         } else {
             this.currentTrial.confidence[1] = AdvisorChoice.getConfidenceFromResponse(trial.response, this.currentTrial.answer[1]);
         }
+        let answer;
         if (this.beepOn == true)
         {
-            let answer = this.currentTrial.answer[1];
+            answer = this.currentTrial.answer[1];
             if (answer === null || isNaN(answer))
             {
                 answer = this.currentTrial.answer[0];
@@ -2866,6 +2910,19 @@ class AdvisorChoice extends DotTask {
             }
 
         }
+        let correct;
+        let conf = (this.currentTrial.confidence[1]+50)/100;
+        if (answer !== this.currentTrial.whichSide)
+        {
+            correct = 0;
+        }
+        else
+        {
+            correct = 1;
+        }
+        points = Math.round(points + (100*(1 - Math.pow((correct - conf),2))));
+        this.currentTrial.points = points;
+        console.log(this.currentTrial.points);
         if ((this.staircase === true) || (this.currentTrial.type === 0))
         {
             this.closeTrial(trial);
