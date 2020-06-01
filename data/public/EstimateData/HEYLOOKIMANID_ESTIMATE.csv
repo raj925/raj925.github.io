@@ -1,0 +1,4 @@
+Intial Estimate,Advisor Estimate,Final Estimate,True Answer,Advisor Error,Participant Error,Race,"Socioeconomic Status (first = lowest, fifth = highest)",Desired Occupation at age 30,Predicted Highest Degree,Region of Country,Time taken PSAT,How many friends are not going to college,Favourite school subject,Taken any AP test
+54,56,55,66,10,11,"White, non-Hispanic",Fifth quintile (highest),Healthcare Practitioners and Technical Occupations,Complete Bachelor's degree,South,Twice,None of them,Social studies/history/government/civics,No
+34,23,33,3,20,30,"White, non-Hispanic",Second quintile,Don't know,Complete HS diploma/GED/alternative HS credential,South,Never,Less than half,Other subject,No
+42,77,54,91,14,37,"More than one race, non-Hispanic",Fifth quintile (highest),Legal Occupations,Complete Ph.D./M.D./law degree/other high level professional degree,West,Twice,None of them,Social studies/history/government/civics,Yes

@@ -551,9 +551,7 @@ class DotTask extends Governor {
         let div = document.querySelector('#jspsych-content');
         let p = div.insertBefore(document.createElement('p'), div.querySelector('p'));
         p.innerHTML = "Your score on the last block was " + (Math.round(score*100)/100).toString() + "%.";
-        p.innerHTML = p.innerHTML + "<br />" + "Your confidence points total is " + trial.points;
-        // let point = document.querySelector(".confidence-points-text p")
-        // point.style = "display: none";
+        //p.innerHTML = p.innerHTML + "<br />" + "Your confidence points total is " + trial.points;
         this.drawProgressBar();
         this.exportGovernor();
     }
@@ -709,6 +707,19 @@ class DotTask extends Governor {
             mandatory: true,
             type: 'text'
         });
+
+        // Define error messages for demo form
+        let errorStyle = "style='color: red;position: absolute;left: 50%;transform: translate(-50%, -50%);top: 60%;'";
+        let genError = document.querySelector('div.jspsych-content-wrapper').appendChild(document.createElement('div'));
+        genError.innerHTML = "<div " + errorStyle + ">Please only provide a single letter: 'm' or 'f'</div>"
+        genError.classList.add('hidden');
+        let devError = document.querySelector('div.jspsych-content-wrapper').appendChild(document.createElement('div'));
+        devError.innerHTML = "<div " + errorStyle + ">Please provide a single digit as an answer</div>"
+        devError.classList.add('hidden');
+        let ageError = document.querySelector('div.jspsych-content-wrapper').appendChild(document.createElement('div'));
+        ageError.innerHTML = "<div " + errorStyle + ">Please provide an age from 18 to 100</div>"
+        ageError.classList.add('hidden');
+
         for(let i = 0; i < questions.length; i++) {
             let comment = form.appendChild(document.createElement('div'));
             comment.id = 'demoCommentContainer'+i;
@@ -771,15 +782,18 @@ class DotTask extends Governor {
                         return false;
                     if (isNaN(parseInt(form.querySelector('#demoCommentAnswer2').value)))
                     {
+                        ageError.classList.remove('hidden');
                         return false;
                     }
                     else
                     {
                         if (parseInt(form.querySelector('#demoCommentAnswer2').value) < 18 || parseInt(form.querySelector('#demoCommentAnswer1').value) > 100)
                         {
+                            ageError.classList.remove('hidden');
                             return false;
                         }
                     }
+                    ageError.classList.add('hidden');
                     saveResponse(this.form);
                     owner.demoFormSubmit(form);
                 };
@@ -789,19 +803,26 @@ class DotTask extends Governor {
                     if(!checkResponse(this.form))
                         return false;
                     if (form.querySelector('#demoCommentAnswer0').value != 'm' && form.querySelector('#demoCommentAnswer0').value != 'f')
+                    {
+                        genError.classList.remove('hidden');
                         return false;
+                    }
                     if (i > 0)
                     {
                         if (isNaN(parseInt(form.querySelector('#demoCommentAnswer1').value)))
                         {
+                            devError.classList.remove('hidden');
                             return false;
                         }
                         if (form.querySelector('#demoCommentAnswer1').value.length > 1)
                         {
+                            devError.classList.remove('hidden');
                             return false;
                         }
                     }
                     saveResponse(this.form);
+                    devError.classList.add('hidden');
+                    genError.classList.add('hidden');
                     let div = this.form.querySelector('.demo-container:not(.hidden)');
                     div.classList.add('hidden');
                     div.nextSibling.classList.remove('hidden');
@@ -1076,7 +1097,7 @@ class DotTask extends Governor {
     * trials should be of the format as follows:
     * practice flag, array of estimation criteria, advisor estimate}
     */
-    drawAdvisorEstimateTask(trials)
+    drawAdvisorEstimateTask(qs)
     {
         let estimateNumber = 1;
         let owner = this;
@@ -1096,10 +1117,10 @@ class DotTask extends Governor {
         // Show true answer
         // Block feedback?
 
-        let numOfTrials = trials.length;
         let questions = [];
+        let numOfQuestions = qs.length;
 
-        for (let i = 0;i<numOfTrials;i++)
+        for (let i = 0;i<numOfQuestions;i++)
         {
 
             questions.push({
@@ -1108,6 +1129,11 @@ class DotTask extends Governor {
                 type: 'text'
             });
         }
+
+        let errorStyle = "style='color: red;position: absolute;left: 50%;transform: translate(-50%, -50%);top: 65%;'";
+        let advError = document.querySelector('div.jspsych-content-wrapper').appendChild(document.createElement('div'));
+        advError.innerHTML = "<div " + errorStyle + ">Please only provide values from 1 to 100</div>";
+        advError.classList.add('hidden');
 
         for(let i = 0; i < questions.length; i++) 
         {
@@ -1122,23 +1148,24 @@ class DotTask extends Governor {
             let commentQ = comment.appendChild(document.createElement('div'));
             commentQ.id = 'estimateCommentQuestion'+i;
             commentQ.className = 'estimate question';
-            let innerhtml = '<table style="margin-bottom: 15em; position: absolute; left: 48%; margin-right: 50%; transform: translate(-50%, -120%);" >';
+            let innerhtml = '<table style="margin-bottom: 15em; position: absolute; left: 48%; transform: translate(-50%, -120%);" >';
 
-            for (let r = 0;r<trials[i].factorNames.length;r++)
+            for (let r = 0;r<qs[i].factorNames.length;r++)
             {
-                innerhtml = innerhtml + '<tr><th style="padding-right: 3em">' + trials[i].factorNames[r] + '</th><th style="padding-left: 3em">' + trials[i].factorValues[r] + '</th></tr>';
+                innerhtml = innerhtml + '<tr><th style="padding-right: 3em; padding-bottom: 0.5em;">' + qs[i].factorNames[r] + '</th><th style="padding-left: 3em; padding-bottom: 0.5em;">' + qs[i].factorValues[r] + '</th></tr>';
             }
 
 
             innerhtml = innerhtml + '</table>';
 
             commentQ.innerHTML = innerhtml;
+            let origHtml = commentQ.innerHTML;
             let commentA = comment.appendChild(document.createElement('textarea'));
 
             commentA.id = 'estimateCommentAnswer'+estimateNumber+i;
             commentA.className = 'estimate answer';
 
-            commentA.placeholder = 'Enter your estimate here';
+            commentA.placeholder = 'Enter your estimate here (1-100)';
 
             let ok = comment.appendChild(document.createElement('button'));
             ok.innerText = i === questions.length - 1? 'submit' : 'next';
@@ -1175,39 +1202,29 @@ class DotTask extends Governor {
             if(i === questions.length - 1)
                 ok.onclick = function (e) {
                     e.preventDefault();
+                    if (estimateNumber == 3)
+                    {
+                        owner.estimateFormSubmit(form,qs,numOfQuestions);
+                    }
                     if(!checkResponse(this.form))
                         return false;
                     let check = '#estimateCommentAnswer'+estimateNumber+i;
                     if (isNaN(parseInt(form.querySelector(check).value)))
                     {
+                        advError.classList.remove('hidden');
                         return false;
                     }
                     if (parseInt(form.querySelector(check).value) > 100 || parseInt(form.querySelector(check).value) < 1)
                     {
+                        advError.classList.remove('hidden');
                         return false;
                     }
-                    saveResponse(this.form);
-                    owner.estimateFormSubmit(form,qs,numOfQuestions);
-                };
-            else
-                ok.onclick = function(e) {
-                    e.preventDefault();
-                    if(!checkResponse(this.form))
-                        return false;
-                    let check = '#estimateCommentAnswer'+estimateNumber+i;
-                    if (isNaN(parseInt(form.querySelector(check).value)))
-                    {
-                        return false;
-                    }
-                    if (parseInt(form.querySelector(check).value) > 100 || parseInt(form.querySelector(check).value) < 1)
-                    {
-                        return false;
-                    }
+                    advError.classList.add('hidden');
                     saveResponse(this.form);
                     if (estimateNumber == 1)
                     {
-                        innerhtml = innerhtml + "<h2>Advisor Estimate: " + trials[i].advEstimate + "</h2>";
-                        innerhtml = innerhtml + "<h2>Your Previous Estimate: " + form.querySelector('#estimateCommentAnswer1' + i).value + "</h2>";
+                        innerhtml = innerhtml + "<h2>Advisor Estimate: " + qs[i].advEstimate + "</h2>";
+                        innerhtml = innerhtml + "<h2 style = 'padding-bottom: 1em;'>Your Previous Estimate: " + form.querySelector('#estimateCommentAnswer1' + i).value + "</h2>";
 
                         commentQ.innerHTML = innerhtml;
                         commentA.classList.add('hidden');
@@ -1217,12 +1234,61 @@ class DotTask extends Governor {
                         commentB.placeholder = 'Make your final estimate';
 
                     }
-                    else
+                    else if (estimateNumber == 2)
+                    {
+                        commentQ.innerHTML = origHtml + "<h1>True Answer: " + qs[i].trueAnswer + "</h1>";
+                        let box = form.querySelector('#estimateCommentAnswer'+estimateNumber+i);
+                        box.classList.add('hidden');
+                        estimateNumber = 3;
+                    }
+                };
+            else
+                ok.onclick = function(e) {
+                    e.preventDefault();
+                    if (estimateNumber == 3)
                     {
                         let div = this.form.querySelector('.estimateContainer:not(.hidden)');
                         div.classList.add('hidden');
                         div.nextSibling.classList.remove('hidden');
                         estimateNumber = 1;
+                        return true;
+                    }
+                    if(!checkResponse(this.form))
+                    {
+                        return false;
+                    } 
+                    let check = '#estimateCommentAnswer'+estimateNumber+i;
+                    if (isNaN(parseInt(form.querySelector(check).value)))
+                    {
+                        advError.classList.remove('hidden');
+                        return false;
+                    }
+                    if (parseInt(form.querySelector(check).value) > 100 || parseInt(form.querySelector(check).value) < 1)
+                    {
+                        advError.classList.remove('hidden');
+                        return false;
+                    }
+                    advError.classList.add('hidden');
+                    saveResponse(this.form);
+                    if (estimateNumber == 1)
+                    {
+                        innerhtml = innerhtml + "<h2>Advisor Estimate: " + qs[i].advEstimate + "</h2>";
+                        innerhtml = innerhtml + "<h2 style = 'padding-bottom: 1em;'>Your Previous Estimate: " + form.querySelector('#estimateCommentAnswer1' + i).value + "</h2>";
+
+                        commentQ.innerHTML = innerhtml;
+                        commentA.classList.add('hidden');
+                        let commentB = comment.appendChild(document.createElement('textarea'));
+                        estimateNumber = 2;
+                        commentB.id = 'estimateCommentAnswer'+estimateNumber+i;
+                        commentB.placeholder = 'Make your final estimate (1-100)';
+
+                    }
+                    else if (estimateNumber == 2)
+                    {
+                        commentQ.innerHTML = origHtml + "<h1>True Answer: " + qs[i].trueAnswer + "</h1>";
+                        let box = form.querySelector('#estimateCommentAnswer'+estimateNumber+i);
+                        box.classList.add('hidden');
+                        estimateNumber = 3;
                     }
 
                 }
@@ -1237,8 +1303,8 @@ class DotTask extends Governor {
      * Submit the form of answers to the estimate task trials.
      *
      */
-    estimateFormSubmit(form) {
-        estimateData = [];
+    estimateFormSubmit(form,qs,numOfQuestions) {
+        var estimateData = [];
         for (let q = 0;q<numOfQuestions;q++)
         {
             let questionQuery = '#estimateCommentAnswer1' + q;
@@ -1248,6 +1314,7 @@ class DotTask extends Governor {
         }
         this.estimates = estimateData;
         jsPsych.finishTrial(this.estimates);
+        this.exportGovernor();
     }
 
 

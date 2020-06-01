@@ -17,6 +17,12 @@ currentDir = os.path.dirname(sys.argv[0])
 currentDir = currentDir + "/JSONs"
 os.chdir(currentDir)
 
+# Anything pre-dots task is contained in the JSON object miscTrials
+# These are flags to say what data we should be looking for
+demoFlag = 0
+surveyFlag = 0
+estimateFlag = 1
+
 logf = open("jsonConvertLog.txt", "w+")
 
 # For all json files in the current directory
@@ -63,55 +69,86 @@ for file in recentFiles:
 
     # Main python function for intepreting JSON data. Won't work without the cleanup above.
     dataJson = json.loads(txt)
-    
-    # Get the demographic data from the JSON
+
     ID = dataJson["rawData"]["participantId"]
-    try:
-        gender = dataJson["rawData"]["miscTrials"][0]["0"]["answer"]
-    except:
-        gender = dataJson["rawData"]["demo"][0]["answer"]
-    try:
-        deviceUse = dataJson["rawData"]["miscTrials"][0]["1"]["answer"]
-        age = dataJson["rawData"]["miscTrials"][0]["2"]["answer"]
-    except:
-        print("couldn't retrive demo info")
 
-    miscTrials = dataJson["rawData"]["miscTrials"]
-    surveys = len(miscTrials)
-    count = 0
-    for x in range(1,surveys):
-        if "0" in miscTrials[x]:
-            for y in range(0,len(miscTrials[x])):
-                if str(y) in miscTrials[x]:
-                    surveyData[count]
-                    surveyData[count].append(miscTrials[x][str(y)]["answer"])
-                    questions[count].append(miscTrials[x][str(y)]["question"])
-            count = count + 1
-        else:
-            continue
-
-    surveyData = list(filter(None, surveyData))
-    questions = list(filter(None, questions))
-
-    if len(surveyData) > 0:
-        for n in range(0,len(surveyData)):
-            surveyFilename = '../Surveys/' + filename[2] + filename[1] + filename[0] + '_' + ID + '_SURVEY' + str(n+1) + '.csv'
-            with open(surveyFilename, mode='w') as survey_file:
-                survey_writer = csv.writer(survey_file, delimiter=',', quotechar='"', quoting=csv.QUOTE_MINIMAL)
-                survey_writer.writerow(questions[n])
-                survey_writer.writerow(surveyData[n])
-
-    # Subject data filename is made up of date and participant ID and is saved in the private folder.
-    subjectFilename = '../../private/Subjects/' + filename[2] + filename[1] + filename[0] + '_' + ID + '_SUBJECT.csv'
+    if (demoFlag == 1):
+        # Get the demographic data from the JSON
+        try:
+            gender = dataJson["rawData"]["miscTrials"][0]["0"]["answer"]
+        except:
+            gender = dataJson["rawData"]["demo"][0]["answer"]
+        try:
+            deviceUse = dataJson["rawData"]["miscTrials"][0]["1"]["answer"]
+            age = dataJson["rawData"]["miscTrials"][0]["2"]["answer"]
+            # Subject data filename is made up of date and participant ID and is saved in the private folder.
+            subjectFilename = '../../private/Subjects/' + filename[2] + filename[1] + filename[0] + '_' + ID + '_SUBJECT.csv'
     
-    # Open subject file to write. Creates new file if it doesn't already exist, otherwise it truncates the current file.
-    with open(subjectFilename, mode='w') as subject_file:
-        subject_writer = csv.writer(subject_file, delimiter=',', quotechar='"', quoting=csv.QUOTE_MINIMAL)
+            # Open subject file to write. Creates new file if it doesn't already exist, otherwise it truncates the current file.
+            with open(subjectFilename, mode='w') as subject_file:
+                subject_writer = csv.writer(subject_file, delimiter=',', quotechar='"', quoting=csv.QUOTE_MINIMAL)
         
-        # Write the column headers first.
-        subject_writer.writerow(['ID', 'date', 'gender', 'age', 'deviceUse'])
-        # Write the corresponding data under each column header.
-        subject_writer.writerow([ID, date, gender, age, deviceUse])
+            # Write the column headers first.
+            subject_writer.writerow(['ID', 'date', 'gender', 'age', 'deviceUse'])
+            # Write the corresponding data under each column header.
+            subject_writer.writerow([ID, date, gender, age, deviceUse])
+
+        except:
+            print("couldn't retrive demo info")
+
+    if (surveyFlag == 1):
+
+        miscTrials = dataJson["rawData"]["miscTrials"]
+        surveys = len(miscTrials)
+        count = 0
+        for x in range(1,surveys):
+            if "0" in miscTrials[x]:
+                for y in range(0,len(miscTrials[x])):
+                    if str(y) in miscTrials[x]:
+                        surveyData[count]
+                        surveyData[count].append(miscTrials[x][str(y)]["answer"])
+                        questions[count].append(miscTrials[x][str(y)]["question"])
+                count = count + 1
+            else:
+                continue
+
+        surveyData = list(filter(None, surveyData))
+        questions = list(filter(None, questions))
+
+        if len(surveyData) > 0:
+            for n in range(0,len(surveyData)):
+                surveyFilename = '../Surveys/' + filename[2] + filename[1] + filename[0] + '_' + ID + '_SURVEY' + str(n+1) + '.csv'
+                with open(surveyFilename, mode='w') as survey_file:
+                    survey_writer = csv.writer(survey_file, delimiter=',', quotechar='"', quoting=csv.QUOTE_MINIMAL)
+                    survey_writer.writerow(questions[n])
+                    survey_writer.writerow(surveyData[n])
+
+    if (estimateFlag == 1):
+        #try:
+        estimateFilename = '../EstimateData/' + ID + '_ESTIMATE.csv'
+        with open(estimateFilename, mode='w+') as dataOut:
+            estimate_writer = csv.writer(dataOut, delimiter=',', quotechar='"', quoting=csv.QUOTE_MINIMAL)
+            miscTrials = dataJson["rawData"]["miscTrials"]
+            factorNames = miscTrials[0]["0"]["question"]["factorNames"]
+            headings = ['Intial Estimate', 'Advisor Estimate', 'Final Estimate', 'True Answer', 'Advisor Error', 'Participant Error'] + factorNames
+            estimate_writer.writerow(headings)
+            advLength = len(miscTrials[0])
+            for x in range(1,int(advLength/4)):
+                index = (4 * x) - 3
+                initialEst = miscTrials[0][str(index)]["answer"]
+                advEst = miscTrials[0][str(index+1)]["question"]["advEstimate"]
+                finalEst = miscTrials[0][str(index+2)]["answer"]
+                trueAns = miscTrials[0][str(index+1)]["question"]["trueAnswer"]
+                advErr = miscTrials[0][str(index+1)]["question"]["advErr"]
+                pptErr = abs(int(trueAns) - int(finalEst))
+                factorVals = miscTrials[0][str(index+1)]["question"]["factorValues"]
+                rowData = [initialEst, advEst, finalEst, trueAns, advErr, pptErr] + factorVals
+                print(rowData)
+                estimate_writer.writerow(rowData)
+
+        #except:
+        #    print("No estimate data")
+
 
     # Get trials data from the JSON.
     trials = dataJson["processedData"]["trials"]

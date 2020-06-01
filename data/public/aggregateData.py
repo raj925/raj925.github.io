@@ -32,7 +32,7 @@ with open(aggregateFilename, mode='w') as dataOut:
     
     # Update the below row to change the column headers for aggregate data file.
     # Make sure the order and length matches the variables added on each row in the last line of this script (ie csv_writer.writerow([...]))
-    csv_writer.writerow(['Participant ID', 'Gender', 'Age', 'Device Use', 'Final Dot Difference', 'Num Of Trials', 'Choice of Human', 'Choice of Algorithm', 'Block 4 Human Acc', 'Block 4 Algor Acc', 'Human Choice After Block 4', 'Algor Choice After Block 4', 'Top Box Chosen', 'Left Box Chosen', 'Preference Strength', 'Max Cj', 'Min Cj', 'Cj Range', 'Num of Unique Cj Values', 'Advice Ignored Trials', 'Mean Cj Change', 'Cj1 Mean Resolution', 'Cj2 Mean Resolution', 'Mean Cj1 Accuracy', 'Mean Cj2 Accuracy', 'Sway of Human Advice', 'Sway of Algor Advice', 'Mean RT1', 'Mean RT2', 'Mean CTC', 'AccQuant1', 'AccQuant2', 'AccQuant3', 'AccQuant4', 'AdvQuant1', 'AdvQuant2', 'AdvQuant3', 'AdvQuant4', 'CjQuant1', 'CjQuant2', 'CjQuant3', 'CjQuant4', 'Mean Cj1', 'Mean Cj2', 'St Dev Cj1', 'St Dev Cj2', 'Human Agreed %', 'Algor Agreed %', 'Algor Agreed % Diff', 'Human Agreed Conf Diff', 'Algor Agreed Conf Diff', 'Human Disagreed Conf Diff', 'Algor Disagreed Conf Diff', 'Algor Relative Influence'])
+    csv_writer.writerow(['Participant ID', 'Gender', 'Age', 'Device Use', 'Final Dot Difference', 'Num Of Trials', 'Choice of Human', 'Choice of Algorithm', 'Block 4 Human Acc', 'Block 4 Algor Acc', 'Human Choice After Block 4', 'Algor Choice After Block 4', 'Top Box Chosen', 'Left Box Chosen', 'Preference Strength', 'Max Cj', 'Min Cj', 'Cj Range', 'Num of Unique Cj Values', 'Advice Ignored Trials', 'Mean Cj Change', 'Cj1 Mean Resolution', 'Cj2 Mean Resolution', 'Mean Cj1 Accuracy', 'Mean Cj2 Accuracy', 'Sway of Human Advice', 'Sway of Algor Advice', 'Mean RT1', 'Mean RT2', 'Mean CTC', 'AccQuant1', 'AccQuant2', 'AccQuant3', 'AccQuant4', 'AdvQuant1', 'AdvQuant2', 'AdvQuant3', 'AdvQuant4', 'CjQuant1', 'CjQuant2', 'CjQuant3', 'CjQuant4', 'Mean Cj1', 'Mean Cj2', 'St Dev Cj1', 'St Dev Cj2', 'Human Agreed %', 'Algor Agreed %', 'Algor Agreed % Diff', 'Human Agreed Conf Diff', 'Algor Agreed Conf Diff', 'Human Disagreed Conf Diff', 'Algor Disagreed Conf Diff', 'Algor Relative Influence', 'dd Block 1 End', 'dd Block 2 End', 'dd Block 3 End', 'Block 1 Accuracy', 'Block 2 Accuracy', 'Block 3 Accuracy', 'Block 4 Algor Choice'])
 
     # For all individual participant files (which jsonConvert names in the form TRIALS.csv)
     for file in glob.glob("*TRIALS.csv"):
@@ -58,6 +58,20 @@ with open(aggregateFilename, mode='w') as dataOut:
                         break    
                 # We only want to pull trials after the practice/staricase trials for this script.
                 # Remove this if you want to include these practice trials in analysis.
+
+                # Staircasing analysis
+                trialNum = df["trialNumber"]
+                blockNum= df["block"]
+                cor1 = df["cor1"]
+                dd = df["dotdifference"]
+                blk1dd = dd.iloc[30]
+                blk2dd = dd.iloc[60]
+                blk3dd = dd.iloc[90]
+                blk1acc = np.sum(cor1.loc[df["block"] == 1])/30
+                blk2acc = np.sum(cor1.loc[df["block"] == 2])/30
+                blk3acc = np.sum(cor1.loc[df["block"] == 3])/30
+
+                # All subsqeuent analysis just on experimental trials
                 df = df.loc[df["block"] > 3]
                 df = df.loc[df["trialType"] != "forceblk4"]
 
@@ -103,6 +117,7 @@ with open(aggregateFilename, mode='w') as dataOut:
                 # We subtract one here because the advisor ids in the trials files are 1 and 2 rather than 0 and 1.
                 algorChoice = len(df.loc[(df["trialType"] == "choice") & (df["whichAdvisor"] == 1)])/choiceNum
                 humanChoice = 1 - algorChoice
+                algorChoiceBlk4 = len(df.loc[(df["trialType"] == "choice") & (df["whichAdvisor"] == 1) & (df["block"] == 4)])/40
 
                 maxCj = np.max(abs(cj1));
                 minCj = np.min(abs(cj1));
@@ -123,8 +138,8 @@ with open(aggregateFilename, mode='w') as dataOut:
                 resolution2 = np.mean(cj2.loc[df["cor2"] == 1]) - np.mean(cj2.loc[df["cor2"] == 0])
                 meanCor1 = np.sum(cor1)/numOfTrials
                 meanCor2 = np.sum(cor2)/numOfTrials
-                humanSway = np.mean(cj2Orig.loc[df["whichAdvisor"] == 1] - cj1Orig.loc[df["whichAdvisor"] == 1])
-                algorSway = np.mean(cj2Orig.loc[df["whichAdvisor"] == 2] - cj1Orig.loc[df["whichAdvisor"] == 2])
+                humanSway = np.mean(cj2.loc[(df["whichAdvisor"] == 1) & (df["trialType"] == "force")] - cj1.loc[(df["whichAdvisor" ] == 1) & (df["trialType"] == "force")])
+                algorSway = np.mean(cj2.loc[(df["whichAdvisor"] == 2) & (df["trialType"] == "force")] - cj1.loc[(df["whichAdvisor"] == 2) & (df["trialType"] == "force")])
                 meanRt1 = np.mean(rt1)
                 meanRt2 = np.mean(rt2)
                 meanCtc = np.mean(ctcTime)
@@ -144,23 +159,23 @@ with open(aggregateFilename, mode='w') as dataOut:
 
                 # Quantiles below created using post-advice confidence.
                 # We can see how these quantiles relate to accuracy and advisor choice.
-                cj2Quant = df.cj2.quantile([0.25,0.5,0.75])
+                cj1Quant = df.cj1.quantile([0.25,0.5,0.75])
 
-                accQuant1 = df.loc[(df["cj2"] < cj2Quant[0.25]), "cor1"]
-                accQuant2 = df.loc[(df["cj2"] > cj2Quant[0.25]) & (df["cj2"] < cj2Quant[0.5]), "cor1"]
-                accQuant3 = df.loc[(df["cj2"] > cj2Quant[0.5]) & (df["cj2"] < cj2Quant[0.75]), "cor1"]
-                accQuant4 = df.loc[(df["cj2"] > cj2Quant[0.75]), "cor1"]
+                accQuant1 = df.loc[(df["cj1"] < cj1Quant[0.25]), "cor1"]
+                accQuant2 = df.loc[(df["cj1"] > cj1Quant[0.25]) & (df["cj1"] < cj1Quant[0.5]), "cor1"]
+                accQuant3 = df.loc[(df["cj1"] > cj1Quant[0.5]) & (df["cj1"] < cj1Quant[0.75]), "cor1"]
+                accQuant4 = df.loc[(df["cj1"] > cj1Quant[0.75]), "cor1"]
                 
-                advQuant1 = df.loc[(df["cj2"] < cj2Quant[0.25]), "whichAdvisor"]-1
-                advQuant2 = df.loc[(df["cj2"] > cj2Quant[0.25]) & (df["cj2"] < cj2Quant[0.5]), "whichAdvisor"]-1
-                advQuant3 = df.loc[(df["cj2"] > cj2Quant[0.5]) & (df["cj2"] < cj2Quant[0.75]), "whichAdvisor"]-1
-                advQuant4 = df.loc[(df["cj2"] > cj2Quant[0.75]), "whichAdvisor"]-1
+                advQuant1 = df.loc[(df["cj1"] < cj1Quant[0.25]), "whichAdvisor"]-1
+                advQuant2 = df.loc[(df["cj1"] > cj1Quant[0.25]) & (df["cj1"] < cj1Quant[0.5]), "whichAdvisor"]-1
+                advQuant3 = df.loc[(df["cj1"] > cj1Quant[0.5]) & (df["cj1"] < cj1Quant[0.75]), "whichAdvisor"]-1
+                advQuant4 = df.loc[(df["cj1"] > cj1Quant[0.75]), "whichAdvisor"]-1
 
                 # This gives you the distribution of cj2 indicated, so you can see how participants use the confidence scale.
-                cjQuant1 = df.loc[(df["cj2"] < cj2Quant[0.25]), "cj2"]
-                cjQuant2 = df.loc[(df["cj2"] > cj2Quant[0.25]) & (df["cj2"] < cj2Quant[0.5]), "cj2"]
-                cjQuant3 = df.loc[(df["cj2"] > cj2Quant[0.5]) & (df["cj2"] < cj2Quant[0.75]), "cj2"]
-                cjQuant4 = df.loc[(df["cj2"] > cj2Quant[0.75]), "cj2"]
+                cjQuant1 = df.loc[(df["cj1"] < cj1Quant[0.25]), "cj1"]
+                cjQuant2 = df.loc[(df["cj1"] > cj1Quant[0.25]) & (df["cj1"] < cj1Quant[0.5]), "cj1"]
+                cjQuant3 = df.loc[(df["cj1"] > cj1Quant[0.5]) & (df["cj1"] < cj1Quant[0.75]), "cj1"]
+                cjQuant4 = df.loc[(df["cj1"] > cj1Quant[0.75]), "cj1"]
                 
                 # Annoying bit below where we have to check if each quantile is empty, otherwise this messes up the table...
                 if accQuant1.empty:
@@ -267,8 +282,12 @@ with open(aggregateFilename, mode='w') as dataOut:
                 earlyAlgorAcc = round(earlyAlgorAcc, 3)
                 laterHumanChoice = round(laterHumanChoice, 3)
                 laterAlgorChoice = round(laterAlgorChoice, 3)
+                blk1acc = round(blk1acc, 3)
+                blk2acc = round(blk2acc, 3)
+                blk3acc = round(blk3acc, 3)
+                algorChoiceBlk4 = round(algorChoiceBlk4, 3)
                                                                                                                           
-                csv_writer.writerow([pid, gender, age, deviceUse, finalDD, numOfTrials, algorChoice, humanChoice, earlyHumanAcc, earlyAlgorAcc, laterHumanChoice, laterAlgorChoice, topBoxChosen, leftBoxChosen, preferenceStrength, maxCj, minCj, cjRange, numOfCjVals, adviceIgnoredTrials, meanCjDiff, resolution, resolution2, meanCor1, meanCor2, humanSway, algorSway, meanRt1, meanRt2, meanCtc, accQuant1, accQuant2, accQuant3, accQuant4, advQuant1, advQuant2, advQuant3, advQuant4, cjQuant1, cjQuant2, cjQuant3, cjQuant4, meanCj1, meanCj2, stDevCj1, stDevCj2, humanAgreedPercent, algorAgreedPercent, agreedDiff, humanAgreedConfDiff, algorAgreedConfDiff, humanDisagreedConfDiff, algorDisagreedConfDiff, algorRelativeInfluence])
+                csv_writer.writerow([pid, gender, age, deviceUse, finalDD, numOfTrials, algorChoice, humanChoice, earlyHumanAcc, earlyAlgorAcc, laterHumanChoice, laterAlgorChoice, topBoxChosen, leftBoxChosen, preferenceStrength, maxCj, minCj, cjRange, numOfCjVals, adviceIgnoredTrials, meanCjDiff, resolution, resolution2, meanCor1, meanCor2, humanSway, algorSway, meanRt1, meanRt2, meanCtc, accQuant1, accQuant2, accQuant3, accQuant4, advQuant1, advQuant2, advQuant3, advQuant4, cjQuant1, cjQuant2, cjQuant3, cjQuant4, meanCj1, meanCj2, stDevCj1, stDevCj2, humanAgreedPercent, algorAgreedPercent, agreedDiff, humanAgreedConfDiff, algorAgreedConfDiff, humanDisagreedConfDiff, algorDisagreedConfDiff, algorRelativeInfluence, blk1dd, blk2dd, blk3dd, blk1acc, blk2acc, blk3acc, algorChoiceBlk4])
 
             except Exception as e:
                 print(str(e))

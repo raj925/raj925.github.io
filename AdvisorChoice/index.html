@@ -75,18 +75,19 @@
     const betaTest = true;  // If true, uses a shortened number of trials for quicker testing purposes
     const doInstruct = false; // If true, shows instructions.
     const doQuestionnaire = false; // If true, includes questionnaires. 
-    const demoQuestions = true; // If true, asks participants for age and gender. Stored in a private folder.
-    const advisorEstimateTask = false; 
+    const demoQuestions = false; // If true, asks participants for age and gender. Stored in a private folder.
+    const advisorEstimateTask = true; // If true, participants do a Dietvorst-style task 
+    const advisorEstimateCounterbalance = true; // If true, the Dietvorst task is counterbalanced with dots task
 
     const memoryMaintenanceTask = false;
     const workingMemoryTask = false;
 
     const numOfBetaTrialsPerBlock = 2; // For beta testing, this is the number of trials in each block.
 
-    const blk4ForcedTrials = false; // If true, add an extra block after practice/staircasing of just forced trials.
+    const blk4ForcedTrials = true; // If true, add an extra block after practice/staircasing of just forced trials.
 
-    const numOfPracticeBlocks = 3; // How many staircasing/practice blocks do you want ppts to do?
-    const numOfExperimentalBlocks = 6; // How many regular blocks of trials do you want ppts to do?
+    const numOfPracticeBlocks = 2; // How many staircasing/practice blocks do you want ppts to do?
+    const numOfExperimentalBlocks = 2; // How many regular blocks of trials do you want ppts to do?
     const numOfPracticeTrialsPerBlock = 30; // How many trials in each practice block?
     const numOfChoiceTrialsPerBlock = 40; // How many choice trials in each experimental block?
     const numOfForcedTrialsPerBlock = 20; // How many forced trials in each experimental block?
@@ -124,6 +125,7 @@
     
     let numOfInstructFiles = 18; 
     let advisorClass = "Cue";
+    let estimateCB;
 
     const prolificID = window.location.search.match('[?&]PROLIFIC_PID=\\w+')[0].substring(14);
 
@@ -264,6 +266,15 @@
 
     if (Math.random() < .5)
         advisorListA = [advisorListA[1], advisorListA[0]];
+
+    if (advisorEstimateCounterbalance == true)
+    {
+    	estimateCB = Math.random();
+    }
+    else
+    {
+    	estimateCB = 0;
+    }
 
 
     /**
@@ -943,13 +954,13 @@
 
     }
 
-    if (advisorEstimateTask == true)
+    if (advisorEstimateTask == true && estimateCB < 0.5)
     {
         timeline.push({
                 type: 'instructions',
                 pages: [''],
                 show_clickable_nav: false,
-                on_load: ()=>gov.drawAdvisorEstimateTask(mbaVars),
+                on_load: ()=>gov.drawAdvisorEstimateTask(utils.shuffle(mbaVars.slice(0,3))),
                 on_finish: (trial)=>{
                     gov.fullscreenMode();
                     gov.storeMiscTrialData(trial);
@@ -1280,12 +1291,36 @@
                 jsPsych.init({
                 timeline: timeline.slice(startingIdx,timeline.length),
                 on_finish: (trial)=>{
-                    gov.drawDebriefForm();
+
+                	if (advisorEstimateTask == true && estimateCB > 0.5)
+				    {
+				        timeline.push({
+				                type: 'instructions',
+				                pages: [''],
+				                show_clickable_nav: false,
+				                on_load: ()=>gov.drawAdvisorEstimateTask(utils.shuffle(mbaVars)),
+				                on_finish: (trial)=>{
+				                    gov.fullscreenMode();
+				                    gov.storeMiscTrialData(trial);
+				                }});
+
+				        jsPsych.init({
+                			timeline: timeline.slice(timeline.length-1,timeline.length),
+                				on_finish: (trial)=>{
+                					gov.drawDebriefForm();
+                		}});
+				    }
+
+				    else
+				    {
+				    	gov.drawDebriefForm();
+				    }      
                 }
                 });
 
         }});    
     }
+
 
 
 </script>
