@@ -37,6 +37,8 @@ for subdir, dirs, files in os.walk("./"):
                 dirTimes = []
                 for jsonfile in jsonfiles:
                     jsonfilename = jsonfile.split("_")
+                    if (jsonfilename[0] == '.DS'):
+                        continue
                     time = jsonfilename[3] + jsonfilename[4] + jsonfilename[5]
                     time = int(float(time))
                     dirTimes.append(time)
@@ -126,25 +128,29 @@ for file in recentFiles:
     if (estimateFlag == 1):
         #try:
         estimateFilename = '../EstimateData/' + ID + '_ESTIMATE.csv'
+        # Need to add a check for trial type and to add data differently
+        # Training, adjust, influence, reward
         with open(estimateFilename, mode='w+') as dataOut:
             estimate_writer = csv.writer(dataOut, delimiter=',', quotechar='"', quoting=csv.QUOTE_MINIMAL)
             miscTrials = dataJson["rawData"]["miscTrials"]
-            factorNames = miscTrials[0]["0"]["question"]["factorNames"]
-            headings = ['Intial Estimate', 'Advisor Estimate', 'Final Estimate', 'True Answer', 'Advisor Error', 'Participant Error'] + factorNames
+            factorNames = miscTrials[0]["0"][0]["question"]["factorNames"]
+            headings = ['Participant Estimate', 'Advisor Estimate', 'True Answer', 'Advisor Error', 'Participant Error', 'Trial Type'] + factorNames
             estimate_writer.writerow(headings)
             advLength = len(miscTrials[0])
-            for x in range(1,int(advLength/4)):
-                index = (4 * x) - 3
-                initialEst = miscTrials[0][str(index)]["answer"]
-                advEst = miscTrials[0][str(index+1)]["question"]["advEstimate"]
-                finalEst = miscTrials[0][str(index+2)]["answer"]
-                trueAns = miscTrials[0][str(index+1)]["question"]["trueAnswer"]
-                advErr = miscTrials[0][str(index+1)]["question"]["advErr"]
-                pptErr = abs(int(trueAns) - int(finalEst))
-                factorVals = miscTrials[0][str(index+1)]["question"]["factorValues"]
-                rowData = [initialEst, advEst, finalEst, trueAns, advErr, pptErr] + factorVals
-                print(rowData)
-                estimate_writer.writerow(rowData)
+            miscLength = len(miscTrials)
+            print(advLength)
+            for y in range(0,int(miscLength)):
+                for x in range(0,int(advLength-4)):
+                    pptEst = miscTrials[y][str(x)][1]["answer"]
+                    advEst = miscTrials[y][str(x)][0]["question"]["advEstimate"]
+                    trueAns = miscTrials[y][str(x)][0]["question"]["trueAnswer"]
+                    advErr = miscTrials[y][str(x)][0]["question"]["advErr"]
+                    pptErr = abs(int(trueAns) - int(pptEst))
+                    trialType = miscTrials[y][str(x)][2]["taskType"]
+                    factorVals = miscTrials[y][str(x)][0]["question"]["factorValues"]
+                    rowData = [pptEst, advEst, trueAns, advErr, pptErr, trialType] + factorVals
+                    print(rowData)
+                    estimate_writer.writerow(rowData)
 
         #except:
         #    print("No estimate data")

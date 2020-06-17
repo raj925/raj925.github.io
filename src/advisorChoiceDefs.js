@@ -98,6 +98,11 @@ class DotTask extends Governor {
         this.numOfTrials = utils.sumList(this.blockStructure) + utils.sumList(this.practiceBlockStructure) + utils.sumList(this.blk4Structure);
         this.workingMemoryStack = [];
         this.maintainMemoryString = "";
+        this.totalReward = 0;
+        this.dotReward = 0;
+        this.estimateReward = 0;
+        this.estimateErr = [];
+        this.meanEstimateErr = [];
     }
 
     /**
@@ -550,8 +555,39 @@ class DotTask extends Governor {
         // }
         let div = document.querySelector('#jspsych-content');
         let p = div.insertBefore(document.createElement('p'), div.querySelector('p'));
-        p.innerHTML = "Your score on the last block was " + (Math.round(score*100)/100).toString() + "%.";
-        //p.innerHTML = p.innerHTML + "<br />" + "Your confidence points total is " + trial.points;
+        let blockScore = (Math.round(score*100)/100).toString();
+        p.innerHTML = "Your score on the last block was " + blockScore + "%.";
+        let practiceBlockCount = this.practiceBlockStructure.length;
+        if (block > (practiceBlockCount+1))
+        {
+            let threshTrialList = utils.getMatches(this.trials, (trial)=>{
+                return trial.block === practiceBlockCount+1;
+            });
+            let threshHitList = utils.getMatches(threshTrialList, (trial)=>{
+                let answer = trial.answer[1];
+                if (answer === null || isNaN(answer))
+                    answer = trial.answer[0];
+                return answer === trial.whichSide;
+            });
+            let threshold = threshHitList.length / threshTrialList.length * 100;
+            threshold = (Math.round(threshold*100)/100);
+            let scoreVal = (Math.round(score*100)/100);
+            let rewardAmount = (scoreVal - threshold)*0.5;
+            if (rewardAmount < 0)
+            {
+                rewardAmount = 0;
+            }
+            else
+            {
+                if (rewardAmount > 5)
+                {
+                    rewardAmount = 5;
+                }
+                p.innerHTML = p.innerHTML + "<br />" + "Based on your performance, you are awarded £" + rewardAmount;
+                this.totalReward = this.totalReward + rewardAmount;
+                this.dotReward = this.dotReward + rewardAmount;
+            }
+        }
         this.drawProgressBar();
         this.exportGovernor();
     }
@@ -1097,9 +1133,10 @@ class DotTask extends Governor {
     * trials should be of the format as follows:
     * practice flag, array of estimation criteria, advisor estimate}
     */
-    drawAdvisorEstimateTask(qs)
+    drawAdvisorEstimateTask(qs,type)
     {
         let estimateNumber = 1;
+        let rewardOutput = 0;
         let owner = this;
         // Create form
         let div = document.querySelector('.jspsych-content').appendChild(document.createElement('div'));
@@ -1116,6 +1153,11 @@ class DotTask extends Governor {
         // Show advice, allow for resestimate
         // Show true answer
         // Block feedback?
+
+        // Can be mixture of feedback trials and incentivised predictions
+        // after training with no feedback
+
+        // Original paper: 15 unincentivised, 10 incentivised
 
         let questions = [];
         let numOfQuestions = qs.length;
@@ -1199,59 +1241,105 @@ class DotTask extends Governor {
                 checkResponse = ()=>true;
            }
 
-            if(i === questions.length - 1)
+            if (type == "reward")
+            {
+                if(i === questions.length - 1)
                 ok.onclick = function (e) {
-                    e.preventDefault();
-                    if (estimateNumber == 3)
+                    if (estimateNumber == 2)
                     {
-                        owner.estimateFormSubmit(form,qs,numOfQuestions);
+                        e.preventDefault();
+                        if(!checkResponse(this.form))
+                            return false;
+                        let check = '#estimateCommentAnswerReward'
+                        if (isNaN(parseInt(form.querySelector(check).value)))
+                        {
+                            return false;
+                        }
+                        if (parseInt(form.querySelector(check).value) > 10 || parseInt(form.querySelector(check).value) < 0)
+                        {
+                            return false;
+                        }
+                        else
+                        {
+                            saveResponse(this.form);
+                            rewardOutput = owner.estimateFormSubmit(form,qs,numOfQuestions,type);
+                        }  
                     }
-                    if(!checkResponse(this.form))
-                        return false;
-                    let check = '#estimateCommentAnswer'+estimateNumber+i;
-                    if (isNaN(parseInt(form.querySelector(check).value)))
+                    else if (estimateNumber == 1)
                     {
-                        advError.classList.remove('hidden');
-                        return false;
-                    }
-                    if (parseInt(form.querySelector(check).value) > 100 || parseInt(form.querySelector(check).value) < 1)
-                    {
-                        advError.classList.remove('hidden');
-                        return false;
-                    }
-                    advError.classList.add('hidden');
-                    saveResponse(this.form);
-                    if (estimateNumber == 1)
-                    {
-                        innerhtml = innerhtml + "<h2>Advisor Estimate: " + qs[i].advEstimate + "</h2>";
-                        innerhtml = innerhtml + "<h2 style = 'padding-bottom: 1em;'>Your Previous Estimate: " + form.querySelector('#estimateCommentAnswer1' + i).value + "</h2>";
-
-                        commentQ.innerHTML = innerhtml;
-                        commentA.classList.add('hidden');
-                        let commentB = comment.appendChild(document.createElement('textarea'));
-                        estimateNumber = 2;
-                        commentB.id = 'estimateCommentAnswer'+estimateNumber+i;
-                        commentB.placeholder = 'Make your final estimate';
-
-                    }
-                    else if (estimateNumber == 2)
-                    {
-                        commentQ.innerHTML = origHtml + "<h1>True Answer: " + qs[i].trueAnswer + "</h1>";
+                        e.preventDefault();
+                        if(!checkResponse(this.form))
+                            return false;
+                        let check = '#estimateCommentAnswer'+estimateNumber+i;
+                        if (isNaN(parseInt(form.querySelector(check).value)))
+                        {
+                            advError.classList.remove('hidden');
+                            return false;
+                        }
+                        if (parseInt(form.querySelector(check).value) > 100 || parseInt(form.querySelector(check).value) < 1)
+                        {
+                            advError.classList.remove('hidden');
+                            return false;
+                        }
+                        advError.classList.add('hidden');
+                        commentQ.innerHTML = origHtml + "<h2>How many of the 10 estimates do you want the advisor to make for you when deciding your bonus?</h2>";
+                        commentQ.innerHTML = commentQ.innerHTML + "<h3> Type a value from 0 to 10 </h3>"; 
                         let box = form.querySelector('#estimateCommentAnswer'+estimateNumber+i);
                         box.classList.add('hidden');
-                        estimateNumber = 3;
+                        let commentAF = comment.appendChild(document.createElement('textarea'));
+                        commentAF.id = 'estimateCommentAnswerReward';
+                        commentAF.className = 'estimate answer';
+                        estimateNumber = 2;
                     }
                 };
-            else
-                ok.onclick = function(e) {
-                    e.preventDefault();
-                    if (estimateNumber == 3)
-                    {
+                else
+                {
+                    ok.onclick = function(e) {
+                        e.preventDefault();
+                        if(!checkResponse(this.form))
+                        {
+                            return false;
+                        } 
+                        let check = '#estimateCommentAnswer'+estimateNumber+i;
+                        if (isNaN(parseInt(form.querySelector(check).value)))
+                        {
+                            advError.classList.remove('hidden');
+                            return false;
+                        }
+                        if (parseInt(form.querySelector(check).value) > 100 || parseInt(form.querySelector(check).value) < 1)
+                        {
+                            advError.classList.remove('hidden');
+                            return false;
+                        }
+                        advError.classList.add('hidden');
+                        saveResponse(this.form);
                         let div = this.form.querySelector('.estimateContainer:not(.hidden)');
                         div.classList.add('hidden');
                         div.nextSibling.classList.remove('hidden');
                         estimateNumber = 1;
                         return true;
+                    }
+                }
+
+            }
+            else if (type == "influence")
+            {
+                ok.onclick = function(e) {
+                    e.preventDefault();
+                    if (estimateNumber == 3)
+                    {
+                        if(i === questions.length - 1)
+                        {
+                            rewardOutput = owner.estimateFormSubmit(form,qs,numOfQuestions,type);
+                        }
+                        else
+                        {
+                            let div = this.form.querySelector('.estimateContainer:not(.hidden)');
+                            div.classList.add('hidden');
+                            div.nextSibling.classList.remove('hidden');
+                            estimateNumber = 1;
+                            return true;
+                        }
                     }
                     if(!checkResponse(this.form))
                     {
@@ -1281,7 +1369,6 @@ class DotTask extends Governor {
                         estimateNumber = 2;
                         commentB.id = 'estimateCommentAnswer'+estimateNumber+i;
                         commentB.placeholder = 'Make your final estimate (1-100)';
-
                     }
                     else if (estimateNumber == 2)
                     {
@@ -1290,12 +1377,115 @@ class DotTask extends Governor {
                         box.classList.add('hidden');
                         estimateNumber = 3;
                     }
+                }
+            }
+            else if (type == "training")
+            {
+                 ok.onclick = function(e) {
+                        e.preventDefault();
+                        if (estimateNumber == 3)
+                        {
+                            if(i === questions.length - 1)
+                            {
+                                rewardOutput = owner.estimateFormSubmit(form,qs,numOfQuestions,type);
+                            }
+                            else
+                            {
+                                let div = this.form.querySelector('.estimateContainer:not(.hidden)');
+                                div.classList.add('hidden');
+                                div.nextSibling.classList.remove('hidden');
+                                estimateNumber = 1;
+                                return true;
+                            }
+                        }
+                        if (estimateNumber == 1)
+                        {
+                            if(!checkResponse(this.form))
+                            {
+                                return false;
+                            } 
+                            let check = '#estimateCommentAnswer'+estimateNumber+i;
+                            if (isNaN(parseInt(form.querySelector(check).value)))
+                            {
+                                advError.classList.remove('hidden');
+                                return false;
+                            }
+                            if (parseInt(form.querySelector(check).value) > 100 || parseInt(form.querySelector(check).value) < 1)
+                            {
+                                advError.classList.remove('hidden');
+                                return false;
+                            }
+                            advError.classList.add('hidden');
+                            saveResponse(this.form);
+                            innerhtml = innerhtml + "<h2>Advisor Estimate: " + qs[i].advEstimate + "</h2>";
+                            commentQ.innerHTML = innerhtml;
+                            commentA.classList.add('hidden');
+                            let box = form.querySelector('#estimateCommentAnswer'+estimateNumber+i);
+                            box.classList.add('hidden');
+                            estimateNumber = 2;
+
+                        }
+                        else if (estimateNumber == 2)
+                        {
+                            commentQ.innerHTML = origHtml + "<h1>True Answer: " + qs[i].trueAnswer + "</h1>";
+                            estimateNumber = 3;
+                        }
+                    }
+
+            }
+            else if (type == "adjust")
+            {
+                innerhtml = innerhtml + "<h2>Advisor Estimate: " + qs[i].advEstimate + "</h2>";
+                commentQ.innerHTML = innerhtml;
+                commentA.placeholder = 'Adjust the Estimate of the Advisor Here (0-100)';
+                ok.onclick = function(e) {
+                    e.preventDefault();
+                    if (estimateNumber == 2)
+                    {
+                        if(i === questions.length - 1)
+                        {
+                            rewardOutput = owner.estimateFormSubmit(form,qs,numOfQuestions,type);
+                        }
+                        else
+                        {
+                            let div = this.form.querySelector('.estimateContainer:not(.hidden)');
+                            div.classList.add('hidden');
+                            div.nextSibling.classList.remove('hidden');
+                            estimateNumber = 1;
+                            return true;
+                        }
+                    }
+                    else if (estimateNumber == 1)
+                    {
+                        if(!checkResponse(this.form))
+                        {
+                            return false;
+                        } 
+                        let check = '#estimateCommentAnswer'+estimateNumber+i;
+                        if (isNaN(parseInt(form.querySelector(check).value)))
+                        {
+                            advError.classList.remove('hidden');
+                            return false;
+                        }
+                        if (parseInt(form.querySelector(check).value) > 100 || parseInt(form.querySelector(check).value) < 1)
+                        {
+                            advError.classList.remove('hidden');
+                            return false;
+                        }
+                        advError.classList.add('hidden');
+                        saveResponse(this.form);
+                        commentQ.innerHTML = origHtml + "<h1>True Answer: " + qs[i].trueAnswer + "</h1>";
+                        commentA.classList.add('hidden');
+                        estimateNumber = 2;
+                    }
 
                 }
-        }
+
+            }
 
         gov.estimateResponses = [];
 
+    }
     }
 
 
@@ -1303,16 +1493,39 @@ class DotTask extends Governor {
      * Submit the form of answers to the estimate task trials.
      *
      */
-    estimateFormSubmit(form,qs,numOfQuestions) {
+    estimateFormSubmit(form,qs,numOfQuestions,type) {
         var estimateData = [];
+        this.estimateErr.push(0);
+        var lastIndex = this.estimateErr.length-1;
         for (let q = 0;q<numOfQuestions;q++)
         {
             let questionQuery = '#estimateCommentAnswer1' + q;
-            estimateData.push({question: qs[q]},{answer: form.querySelector(questionQuery).value});
-            questionQuery = '#estimateCommentAnswer2' + q;
-            estimateData.push({question: qs[q]},{answer: form.querySelector(questionQuery).value});
+            estimateData.push([{question: qs[q]},{answer: form.querySelector(questionQuery).value},{taskType: type}]);
+            this.estimateErr[lastIndex] = this.estimateErr[lastIndex] + (Math.abs((qs[q].trueAnswer) - (form.querySelector(questionQuery).value)));
+            if (type == "influence")
+            {
+                questionQuery = '#estimateCommentAnswer2' + q;
+                estimateData.push([{question: qs[q]},{answer: form.querySelector(questionQuery).value},{taskType: type}]);
+            }
+        }
+        if (type == "reward")
+        {
+            let questionQuery = '#estimateCommentAnswerReward';
+            estimateData.push([{question: "reward choice"},{answer: form.querySelector(questionQuery).value},{taskType: type}]);
         }
         this.estimates = estimateData;
+        var meanErr = this.estimateErr[lastIndex]/numOfQuestions;
+        var estRew = Math.round(meanErr);
+        if (estRew > 25 || type == 'training')
+        {
+            estRew = 0
+        }
+        else
+        {
+            estRew = (6-Math.ceil(estRew/5))*0.5;
+            this.meanEstimateErr.push(meanErr);
+        }
+        this.estimateReward = this.estimateReward + estRew;
         jsPsych.finishTrial(this.estimates);
         this.exportGovernor();
     }

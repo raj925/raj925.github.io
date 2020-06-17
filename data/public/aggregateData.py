@@ -55,7 +55,25 @@ with open(aggregateFilename, mode='w') as dataOut:
                             gender = subjectDf["gender"][0]
                             age = subjectDf["age"][0]
                             deviceUse = subjectDf["deviceUse"][0]
-                        break    
+                        break
+
+                try:
+                    for estimateFile in os.listdir('../../private/Subjects'):
+                        estimateName = '*' + pid + '_SUBJECT.csv'
+                        if fnmatch.fnmatch(estimateFile, estimateName):
+                            f = './EstimateData/' + estimateFile
+                            with open(f) as estimateDataIn:
+                                estimateDf = pd.read_csv(estimateDataIn, usecols=['Participant Estimate','Advisor Estimate','True Answer','Advisor Error','Participant Error', 'Trial Type'])
+                                pptErr = estimateDf['Participant Error']
+                                advErr = estimateDf['Advisor Error']
+                                trueAns = estimateDf['True Answer']
+                                avPptErrTrain = np.mean(pptErr.loc[(estimateDf['Trial Type'] == "training")])
+                                avPptErrAdj = np.mean(pptErr.loc[(estimateDf['Trial Type'] == "adjust")])
+                                avPptErrRew = np.mean(pptErr.loc[(estimateDf['Trial Type'] == "reward")])
+                                avAdvErrTrain = np.mean(advErr.loc[(estimateDf['Trial Type'] == "training")])
+                                avAdvErrAdj = np.mean(advErr.loc[(estimateDf['Trial Type'] == "adjust")])
+                                avAdvErrRew = np.mean(advErr.loc[(estimateDf['Trial Type'] == "reward")])
+                            break    
                 # We only want to pull trials after the practice/staricase trials for this script.
                 # Remove this if you want to include these practice trials in analysis.
 

@@ -73,7 +73,7 @@
     // (If no comments, that variable is not functional yet so LEAVE IT AS IS!)
 
     const betaTest = true;  // If true, uses a shortened number of trials for quicker testing purposes
-    const doInstruct = false; // If true, shows instructions.
+    const doInstruct = true; // If true, shows instructions.
     const doQuestionnaire = false; // If true, includes questionnaires. 
     const demoQuestions = false; // If true, asks participants for age and gender. Stored in a private folder.
     const advisorEstimateTask = true; // If true, participants do a Dietvorst-style task 
@@ -110,6 +110,7 @@
                                      // and is then fixed after those blocks.
     const stopIfZero = false;
     const beepIfIncorrect = true; // If true, play sound if trial is incorrect (see incorrectAudioSrc)
+    const rewardBonus = true;
 
     const advisor1Src = 'assets/image/human.jpg'; // Filepath for advisor 1 image
     const advisor2Src = 'assets/image/comp.jpg'; // Filepath for advisor 2 image
@@ -152,10 +153,23 @@
     let advisorListA;
     let advisorListB;
     let numTrial;
+    let mbaVarsTrain;
+    let mbaVarsAdj;
+    let mbaVarsRew;
+    let rewardAmount;
 
     let instructionFiles = [];
 
     advisorIdDeck = [1,2];
+
+    // Change here if you want different numbers of trials in each section
+    if (advisorEstimateTask)
+    {
+        mbaVars = utils.shuffle(mbaVars);
+        mbaVarsTrain = mbaVars.slice(0,10);
+        mbaVarsAdj = mbaVars.slice(10,20);
+        mbaVarsRew = mbaVars.slice(20,30);
+    }
 
     // Set the number of [forced,choice] trials per block.
     if (betaTest == true)
@@ -381,6 +395,13 @@
     const browserInstruct = {
         type: 'instructions',
         pages: ["<p>Please do not use the back or forward buttons on your browser during the experiment. Data on your performance will not save until the end of the experiment so do not close your browser unless you would no longer like to participate. Thank you for cooperation!</p>" + "<p>Press Next to begin.</p>"],
+        show_clickable_nav: true,
+        on_finish: (trial)=>gov.storeMiscTrialData(trial)
+    };
+
+    const rewardText = {
+        type: 'instructions',
+        pages: ["<p>In the previous block, based on your performance, you were awarded:</p>"],
         show_clickable_nav: true,
         on_finish: (trial)=>gov.storeMiscTrialData(trial)
     };
@@ -956,16 +977,48 @@
 
     if (advisorEstimateTask == true && estimateCB < 0.5)
     {
+
         timeline.push({
                 type: 'instructions',
                 pages: [''],
                 show_clickable_nav: false,
-                on_load: ()=>gov.drawAdvisorEstimateTask(utils.shuffle(mbaVars.slice(0,3))),
+                on_load: ()=>
+                {
+                    gov.drawAdvisorEstimateTask(mbaVarsTrain,'training');
+                    gov.fullscreenMode();
+                },
                 on_finish: (trial)=>{
                     gov.fullscreenMode();
                     gov.storeMiscTrialData(trial);
-                }
-            });
+                }});
+
+        timeline.push({
+                type: 'instructions',
+                pages: [''],
+                show_clickable_nav: false,
+                on_load: ()=>
+                {
+                    gov.drawAdvisorEstimateTask(mbaVarsAdj,'adjust');
+                    gov.fullscreenMode();
+                },
+                on_finish: (trial)=>{
+                    gov.fullscreenMode();
+                    gov.storeMiscTrialData(trial);
+                }});
+
+        timeline.push({
+                type: 'instructions',
+                pages: [''],
+                show_clickable_nav: false,
+                on_load: ()=>
+                {
+                    gov.drawAdvisorEstimateTask(mbaVarsRew,'reward');
+                    gov.fullscreenMode();
+                },
+                on_finish: (trial)=>{
+                    gov.fullscreenMode();
+                    gov.storeMiscTrialData(trial);
+                }});
     }
 
     if (doInstruct == true)
@@ -1140,6 +1193,9 @@
                 on_finish: (trial)=>{
                     gov.fullscreenMode();
                     gov.trials = (gov.trials).concat(gov.getTrials("experimental"));
+                    let forcedblk4Trials = utils.getMatches(gov.trials, function(trial) {
+                        return trial.type == 5;
+                    });
                     // real experiment
                     if (blk4ForcedTrials == true)
                     {
@@ -1286,7 +1342,8 @@
                         timeline.push(genTrustQuestionnaire);
                     }
 
-                //console.log(gov.trials);
+                console.log(gov.trials);
+                console.log(timeline);
 
                 jsPsych.init({
                 timeline: timeline.slice(startingIdx,timeline.length),
@@ -1298,11 +1355,57 @@
 				                type: 'instructions',
 				                pages: [''],
 				                show_clickable_nav: false,
-				                on_load: ()=>gov.drawAdvisorEstimateTask(utils.shuffle(mbaVars)),
+				                on_load: ()=>
+                                {
+                                    gov.drawAdvisorEstimateTask((utils.shuffle(mbaVars)).slice(0,9),'training');
+                                    gov.fullscreenMode();
+                                },
 				                on_finish: (trial)=>{
 				                    gov.fullscreenMode();
 				                    gov.storeMiscTrialData(trial);
 				                }});
+
+                        timeline.push({
+                                type: 'instructions',
+                                pages: [''],
+                                show_clickable_nav: false,
+                                on_load: ()=>
+                                {
+                                    rewardAmount = gov.drawAdvisorEstimateTask(mbaVarsTrain,'training');
+                                    gov.fullscreenMode();
+                                },
+                                on_finish: (trial)=>{
+                                    gov.fullscreenMode();
+                                    gov.storeMiscTrialData(trial);
+                                }});
+
+                        timeline.push({
+                                type: 'instructions',
+                                pages: [''],
+                                show_clickable_nav: false,
+                                on_load: ()=>
+                                {
+                                    rewardAmount = gov.drawAdvisorEstimateTask(mbaVarsAdj,'adjust');
+                                    gov.fullscreenMode();
+                                },
+                                on_finish: (trial)=>{
+                                    gov.fullscreenMode();
+                                    gov.storeMiscTrialData(trial);
+                                }});
+
+                        timeline.push({
+                                type: 'instructions',
+                                pages: [''],
+                                show_clickable_nav: false,
+                                on_load: ()=>
+                                {
+                                    rewardAmount = gov.drawAdvisorEstimateTask(mbaVarsRew,'reward');
+                                    gov.fullscreenMode();
+                                },
+                                on_finish: (trial)=>{
+                                    gov.fullscreenMode();
+                                    gov.storeMiscTrialData(trial);
+                                }});
 
 				        jsPsych.init({
                 			timeline: timeline.slice(timeline.length-1,timeline.length),
