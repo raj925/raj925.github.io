@@ -74,7 +74,7 @@
 
     const betaTest = true;  // If true, uses a shortened number of trials for quicker testing purposes
     const doInstruct = true; // If true, shows instructions.
-    const doQuestionnaire = false; // If true, includes questionnaires. 
+    const doQuestionnaire = true; // If true, includes questionnaires. 
     const demoQuestions = false; // If true, asks participants for age and gender. Stored in a private folder.
     const advisorEstimateTask = true; // If true, participants do a Dietvorst-style task 
     const advisorEstimateCounterbalance = true; // If true, the Dietvorst task is counterbalanced with dots task
@@ -87,19 +87,20 @@
     const blk4ForcedTrials = true; // If true, add an extra block after practice/staircasing of just forced trials.
 
     const numOfPracticeBlocks = 2; // How many staircasing/practice blocks do you want ppts to do?
-    const numOfExperimentalBlocks = 2; // How many regular blocks of trials do you want ppts to do?
+    const numOfExperimentalBlocks = 4; // How many regular blocks of trials do you want ppts to do?
     const numOfPracticeTrialsPerBlock = 30; // How many trials in each practice block?
-    const numOfChoiceTrialsPerBlock = 40; // How many choice trials in each experimental block?
-    const numOfForcedTrialsPerBlock = 20; // How many forced trials in each experimental block?
+    const numOfForcedTrialsInBlk4 = 60; // If there is a block of forced trials, how many trials?
+    const numOfChoiceTrialsPerBlock = 20; // How many choice trials in each experimental block?
+    const numOfForcedTrialsPerBlock = 10; // How many forced trials in each experimental block?
 
     const numOfDots = 200; // Number of dots in EACH grid.
     const initialDotDifference = 15; // What the dot difference starts at (also max DD)
                                    // So (numOfDots +/- dotdifference) in each grid.
 
-    const trialPreInterval = 500; // Number of milliseconds between trials.
+    const trialPreInterval = 400; // Number of milliseconds between trials.
     const trialPreStim = 500; // Number of milliseconds before the stimulus (with fixation cross on screen)
     const trialStimDuration = 160; // Number of milliseconds that the stimulus should flash up for.
-    const trialFeedbackDuration = 500; // Number of milliseconds at the end of each trial.
+    const trialFeedbackDuration = 100; // Number of milliseconds at the end of each trial.
 
     const adviceWithConfidence = false; // If true, advisors give a confidence % 
                                      // along with their advice of left/right. 
@@ -109,14 +110,14 @@
                                      // If false, staircasing only applies in the practice blocks,
                                      // and is then fixed after those blocks.
     const stopIfZero = false;
-    const beepIfIncorrect = true; // If true, play sound if trial is incorrect (see incorrectAudioSrc)
+    const beepIfIncorrect = false; // If true, play sound if trial is incorrect (see incorrectAudioSrc)
     const rewardBonus = true;
 
     const advisor1Src = 'assets/image/human.jpg'; // Filepath for advisor 1 image
     const advisor2Src = 'assets/image/comp.jpg'; // Filepath for advisor 2 image
     const incorrectAudioSrc = 'assets/audio/beep.mp3'; // Filepath of sound played when incorrect
 
-    const endRedirectURL = 'https://www.bbc.co.uk'; //What URL to redirect to after the experiment, usually a Prolific completion URL.
+    const endRedirectURL = 'https://app.prolific.co/submissions/complete?cc=595E8D06'; //What URL to redirect to after the experiment, usually a Prolific completion URL.
 
     // Possible future extensions: See Stim Again, Difference Advisors with/out confidence
 
@@ -124,7 +125,8 @@
     ///////////////////////////////////////////////////////////////////
     ///////////////////////////////////////////////////////////////////
     
-    let numOfInstructFiles = 18; 
+    let numOfInstructFiles = 25; 
+    let numOfEstInstructFiles = 11;
     let advisorClass = "Cue";
     let estimateCB;
 
@@ -156,9 +158,30 @@
     let mbaVarsTrain;
     let mbaVarsAdj;
     let mbaVarsRew;
-    let rewardAmount;
+    let CBcondition; 
+    let files;
 
     let instructionFiles = [];
+
+    const dotsQs = ["The human advisor is reliable.",
+    "The human advisor is dependable.",
+    "I can trust the human advisor.",
+    "I am confident in the human advisor.",
+    "The computer advisor is reliable.",
+    "The computer advisor is dependable.",
+    "I can trust the computer advisor.",
+    "I am confident in the computer advisor.",
+    "I feel that the task was too easy.",
+    "This task would be much harder without an advisor.",
+    "I believe the human's advice was from a real person who was a past participant.",
+    "I believe the computer's advice was from a real algorithm."];
+
+    const dotsAs = ["Strongly Disagree", "Disagree", "Neutral", "Agree", "Strongly Agree"];
+
+    const estQs = ["How much confidence do you have in the statistical model's estimates?",
+    "How much confidence do you have in your estimates?"];
+
+    const estAs = ["None", "Little", "Some", "A Fair Amount", "A Lot"];    
 
     advisorIdDeck = [1,2];
 
@@ -187,6 +210,11 @@
         for (let c=1;c<=numOfInstructFiles;c++)
         {
             let fileName = "./instructions/Slide" + c.toString() + ".jpeg";
+            instructionFiles.push(fileName);
+        }
+        for (let c=1;c<=numOfEstInstructFiles;c++)
+        {
+            let fileName = "./instructions/EstSlide" + c.toString() + ".jpeg";
             instructionFiles.push(fileName);
         }
     }
@@ -228,7 +256,7 @@
         }
         if (blk4ForcedTrials == true)
         {
-            blk4.push({[trialTypes.forceblk4]: numOfChoiceTrialsPerBlock + numOfForcedTrialsPerBlock});
+            blk4.push({[trialTypes.forceblk4]: numOfForcedTrialsInBlk4});
             for (let f=0;f<numOfExperimentalBlocks+2;f++)
             {
                 regBlock.push({ [trialTypes.choice]: numOfChoiceTrialsPerBlock, [trialTypes.force]: numOfForcedTrialsPerBlock });
@@ -290,6 +318,18 @@
     	estimateCB = 0;
     }
 
+    if (estimateCB == 0)
+    {
+        CBcondition = 0;
+    }
+    else if (estimateCB < 0.5)
+    {
+        CBcondition = 1; //estimate task first
+    }
+    else
+    {
+        CBcondition = 2; //dots task first
+    }
 
     /**
      * The governor contains the properties which the experiment functions need to access from everywhere.
@@ -338,6 +378,7 @@
         audioSrc: incorrectAudioSrc,
         staircase: wholeExpStaircasing,
         redirect: endRedirectURL,
+        CBcondition: CBcondition,
         advisorClass
     });
 
@@ -385,7 +426,7 @@
         ],
         show_clickable_nav: true,
         //on_load: ()=>gov.drawDemographicForm(),
-        on_load: ()=>gov.drawProgressBar(),
+        on_load: ()=>gov.fullscreenMode(),
         on_finish: (trial)=>{
             gov.fullscreenMode();
             gov.storeMiscTrialData(trial);
@@ -403,8 +444,24 @@
         type: 'instructions',
         pages: ["<p>In the previous block, based on your performance, you were awarded:</p>"],
         show_clickable_nav: true,
+        on_load: ()=>gov.blockFeedback(),
         on_finish: (trial)=>gov.storeMiscTrialData(trial)
     };
+
+    const task1Intro = {
+        type: 'instructions',
+        pages: ["<p>Thank you for your participation. You will be performing two tasks during the experiment. </p>" + "What follows are the instructions for the first task."],
+        show_clickable_nav: true,
+        on_finish: (trial)=>gov.fullscreenMode()
+    };
+
+    const task2Intro = {
+        type: 'instructions',
+        pages: ["<p>You have completed the first of the two tasks. </p>" + "What follows are the instructions for the second task."],
+        show_clickable_nav: true,
+        on_finish: (trial)=>gov.fullscreenMode()
+    };
+
 
 
         /* define thank you message at the end of the experiment */
@@ -492,7 +549,7 @@
         "<p>Only your final position will count.</p>" +
         "<p>Click 'next' to see an example.</p>"],
         show_clickable_nav: true,
-        on_load: ()=>gov.drawProgressBar(),
+        on_load: ()=>gov.fullscreenMode(),
         on_finish: (trial)=>gov.storeMiscTrialData(trial)
     };
 
@@ -501,7 +558,7 @@
         pages: ["<p>Sometimes you will be given a <strong>choice of advisor</strong>.</p>" +
         "<p>Click 'next' to see an example.</p>"],
         show_clickable_nav: true,
-        on_load: ()=>gov.drawProgressBar(),
+        on_load: ()=>gov.fullscreenMode(),
         on_finish: (trial)=>gov.storeMiscTrialData(trial)
     };
 
@@ -509,7 +566,7 @@
         type: 'instructions',
         pages: ["<p>The experiment will begin after you have practiced a little with advice.</p>"],
         show_clickable_nav: true,
-        on_load: ()=>gov.drawProgressBar(),
+        on_load: ()=>gov.fullscreenMode(),
         on_finish: (trial)=>gov.storeMiscTrialData(trial)
     };
 
@@ -520,7 +577,7 @@
         "<p>You will do some trials of the task seeing both advisors and some where you have to choose.</p>" +
         "<p>You will no longer receive feedback on the task.</p>"],
         show_clickable_nav: true,
-        on_load: ()=>gov.drawProgressBar(),
+        on_load: ()=>gov.fullscreenMode(),
         on_finish: (trial)=>gov.storeMiscTrialData(trial)
     };
 
@@ -528,15 +585,15 @@
         type: 'instructions',
         pages: ["<p>You will first be asked a series of questions before starting the experiment.</p>" +"<p>Please answer as truthfully as possible.</p>" + "<p>Press Next to begin.</p>"],
         show_clickable_nav: true,
-        on_load: ()=>gov.drawProgressBar(),
+        on_load: ()=>gov.fullscreenMode(),
         on_finish: (trial)=>gov.storeMiscTrialData(trial)
     };
 
     const questionEnd = {
         type: 'instructions',
-        pages: ["<p>Please take some time to answer a few final questions.</p>" + "<p>Please answer as truthfully as possible.</p>" + "<p>Press Next to begin.</p>"],
+        pages: ["<p>Please take some time to answer a few questions about the task you just did.</p>" + "<p>Please answer as truthfully as possible.</p>" + "<p>Press Next to begin.</p>"],
         show_clickable_nav: true,
-        on_load: ()=>gov.drawProgressBar(),
+        on_load: ()=>gov.fullscreenMode(),
         on_finish: (trial)=>gov.storeMiscTrialData(trial)
     }
 
@@ -544,8 +601,10 @@
         type: 'instructions',
         pages: ["<h1>Break</h1><p>You may take a moment to rest here. Press 'next' when you are ready.</p>"],
         show_clickable_nav: true,
-        on_load: ()=>gov.blockFeedback(),
-        on_finish: (trial)=>gov.storeMiscTrialData(trial)
+        on_load: ()=> gov.blockFeedback(),
+        on_finish: (trial)=>{
+            gov.storeMiscTrialData(trial);
+        }
     };
 
     /* Initial response: present an initial stimulus and get a decision */
@@ -636,6 +695,33 @@
     };
 
     /* Initial response: present an initial stimulus and get a decision */
+    const initialDecisionDelay = {
+        type: "canvas-sliders-response",
+        stimulus: (canvasId)=>gov.drawDots(canvasId),
+        stimulus_duration: gov.preTrialInterval + gov.preStimulusInterval + gov.stimulusDuration,
+        hideFunction: (canvasContainer)=>gov.maskDots(canvasContainer),
+        prompt: '',
+        sliderCount: 1,
+        slider_prompt: [
+            '<p>Left click on the slider, click Continue to confirm.</p>'
+        ],
+        slider_name: [
+            'answer'
+        ],
+        reversed: [false],
+        slider_full_width: [true],
+        slider_col_spacing: [0],
+        exclusive_group: [1],
+        require_change: [1],
+        canvasWidth: testCanvas.w,
+        canvasHeight: testCanvas.h,
+        post_trial_gap:700,
+        on_load: ()=>gov.setSliderClick(),
+        check_response: (trialresponse)=>gov.checkResponse(trialresponse),
+        on_finish: (trial)=>gov.initialResponse(trial)
+    };
+
+    /* Initial response: present an initial stimulus and get a decision */
     const initialDecision = {
         type: "canvas-sliders-response",
         stimulus: (canvasId)=>gov.drawDots(canvasId),
@@ -712,6 +798,7 @@
         require_change: [1],
         canvasWidth: testCanvas.w,
         canvasHeight: testCanvas.h,
+        post_trial_gap:700,
         on_load: ()=>gov.showAdvice(),
         check_response: (trialresponse)=>gov.checkResponse(trialresponse),
         on_finish: (trial)=>{
@@ -927,7 +1014,7 @@
 
     const procedures_feedback = {
         //feedbackDisplay removed for now from arrays.
-        [trialTypes.catch]: [initialDecision],
+        [trialTypes.catch]: [initialDecisionDelay],
         [trialTypes.force]: [initialDecision, advice, finalDecision],
         [trialTypes.choice]: [initialDecision, advice, finalDecision],
         [trialTypes.dual]: [initialDecision, advice, finalDecision],
@@ -956,27 +1043,37 @@
         timeline.push(demo);
     }
 
-    if (doQuestionnaire == true)
+    timeline.push(browserInstruct);
+
+
+    if (doInstruct == true)
     {
-        timeline.push(questionStart);
-        for (let x = 0;x<Qs.length;x++)
+        timeline.push(task1Intro);
+    }
+
+
+    if (advisorEstimateTask == true && CBcondition == 1)
+    {
+        files = [];
+        for (let n = 1;n<8;n++)
+        {
+            files.push('<img width="1000" height="700" src="./instructions/EstSlide' + (n).toString() + '.jpeg"></img>');
+        }
+        if (doInstruct == true)
         {
             timeline.push({
                 type: 'instructions',
-                pages: [''],
-                show_clickable_nav: false,
-                on_load: ()=>gov.drawRadioQuestionnaire(utils.shuffle(Qs[x]),As[x],names[x]),
+                pages: files,
+                show_clickable_nav: true,
+                allow_backward: true,
+                button_label_previous: 'Previous',
+                on_load: ()=>gov.drawProgressBar(),
                 on_finish: (trial)=>{
                     gov.fullscreenMode();
                     gov.storeMiscTrialData(trial);
                 }
             });
         }
-
-    }
-
-    if (advisorEstimateTask == true && estimateCB < 0.5)
-    {
 
         timeline.push({
                 type: 'instructions',
@@ -992,6 +1089,27 @@
                     gov.storeMiscTrialData(trial);
                 }});
 
+        files = [];
+        for (let n = 8;n<10;n++)
+        {
+            files.push('<img width="1000" height="700" src="./instructions/EstSlide' + (n).toString() + '.jpeg"></img>');
+        }
+        if (doInstruct == true)
+        {
+            timeline.push({
+                type: 'instructions',
+                pages: files,
+                show_clickable_nav: true,
+                allow_backward: true,
+                button_label_previous: 'Previous',
+                on_load: ()=>gov.drawProgressBar(),
+                on_finish: (trial)=>{
+                    gov.fullscreenMode();
+                    gov.storeMiscTrialData(trial);
+                }
+            });
+        }
+
         timeline.push({
                 type: 'instructions',
                 pages: [''],
@@ -1004,7 +1122,30 @@
                 on_finish: (trial)=>{
                     gov.fullscreenMode();
                     gov.storeMiscTrialData(trial);
+                    gov.blockFeedback(1);
                 }});
+
+        files = [];
+        for (let n = 10;n<12;n++)
+        {
+            files.push('<img width="1000" height="700" src="./instructions/EstSlide' + (n).toString() + '.jpeg"></img>');
+        }
+        if (doInstruct == true)
+        {
+            timeline.push({
+                type: 'instructions',
+                pages: files,
+                show_clickable_nav: true,
+                allow_backward: true,
+                button_label_previous: 'Previous',
+                on_load: ()=>gov.drawProgressBar(),
+                on_finish: (trial)=>{
+                    gov.fullscreenMode();
+                    gov.storeMiscTrialData(trial);
+                }
+            });
+        }
+
 
         timeline.push({
                 type: 'instructions',
@@ -1018,35 +1159,55 @@
                 on_finish: (trial)=>{
                     gov.fullscreenMode();
                     gov.storeMiscTrialData(trial);
+                    gov.blockFeedback(1);
                 }});
-    }
 
-    if (doInstruct == true)
-    {
-        for (let n = 0;n<12;n++)
+        if (doQuestionnaire == true)
         {
-            let file = '<img width="1000" height="700" src="./instructions/Slide' + (n+1).toString() + '.jpeg"></img>';
+            timeline.push(questionEnd);
             timeline.push({
                 type: 'instructions',
-                pages: [
-                    file
-                ],
-                show_clickable_nav: true,
-                on_load: ()=>gov.drawProgressBar(),
+                pages: [''],
+                show_clickable_nav: false,
+                on_load: ()=>gov.drawRadioQuestionnaire(estQs,estAs,"Post-Est Questions"),
                 on_finish: (trial)=>{
                     gov.fullscreenMode();
                     gov.storeMiscTrialData(trial);
                 }
             });
         }
+
+        if (doInstruct == true)
+        {
+            timeline.push(task2Intro);
+        }
+    }
+
+    if (doInstruct == true)
+    {
+        files = [];
+        for (let n = 0;n<12;n++)
+        {
+            files.push('<img width="1000" height="700" src="./instructions/Slide' + (n+1).toString() + '.jpeg"></img>');
+        }
+        timeline.push({
+            type: 'instructions',
+            pages: files,
+            show_clickable_nav: true,
+            allow_backward: true,
+            button_label_previous: 'Previous',
+            on_load: ()=>gov.drawProgressBar(),
+            on_finish: (trial)=>{
+                gov.fullscreenMode();
+                gov.storeMiscTrialData(trial);
+            }
+        });
     }
 
     else
     {
         timeline.push(welcome);
     }
-
-    timeline.push(browserInstruct);
 
 
     // fill in the remaining non-advisor practice blocks
@@ -1187,57 +1348,100 @@
         document.querySelector('#initText').innerHTML = 'This study currently does not support mobile devices. Please complete the study on a desktop computer or laptop.';
     }
 
-    else {  
-            jsPsych.init({
-                timeline: timeline,
-                on_finish: (trial)=>{
-                    gov.fullscreenMode();
-                    gov.trials = (gov.trials).concat(gov.getTrials("experimental"));
-                    let forcedblk4Trials = utils.getMatches(gov.trials, function(trial) {
-                        return trial.type == 5;
-                    });
+        jsPsych.init({
+            timeline: timeline,
+            preload_images: instructionFiles,
+            on_finish: (trial)=>{
+                gov.fullscreenMode();
+                gov.trials = (gov.trials).concat(gov.getTrials("experimental"));
+                let forcedblk4Trials = utils.getMatches(gov.trials, function(trial) {
+                    return trial.type == 5;
+                });
+                // real experiment
+                if (blk4ForcedTrials == true)
+                {
+                    for (let n = 18;n<22;n++)
+                    {
+                        if (doInstruct == true)
+                        {
+                            let file = '<img width="1000" height="700" src="./instructions/Slide' + (n+1).toString() + '.jpeg"></img>';
+                            timeline.push({
+                                type: 'instructions',
+                                pages: [
+                                    file
+                                ],
+                                show_clickable_nav: true,
+                                on_load: ()=>gov.drawProgressBar(),
+                                on_finish: (trial)=>{
+                                    gov.fullscreenMode();
+                                    gov.storeMiscTrialData(trial);
+                                }
+                            });
+                        }
+                    }
+                    for (let a=0; a<gov.advisorLists.length; a++) 
+                    {
+                        
+                        let trials = utils.getMatches(forcedblk4Trials, function(trial) 
+                        {
+                            return trial.block === gov.practiceBlockStructure.length;
+                        });
+
+                        // add the trials selecting the appropriate procedure for the trial type
+                        while(trials.length)
+                        {
+                            timeline.push({timeline: procedures[trials.shift().type]});
+                        }
+                        timeline.push(blockBreak);
+
+                    }
+
+                    for (let n = 22;n<25;n++)
+                    {
+                        if (doInstruct == true)
+                        {
+                            let file = '<img width="1000" height="700" src="./instructions/Slide' + (n+1).toString() + '.jpeg"></img>';
+                            timeline.push({
+                                type: 'instructions',
+                                pages: [
+                                    file
+                                ],
+                                show_clickable_nav: true,
+                                on_load: ()=>gov.drawProgressBar(),
+                                on_finish: (trial)=>{
+                                    gov.fullscreenMode();
+                                    gov.storeMiscTrialData(trial);
+                                }
+                            });
+                        }
+                    }
+
+                }
+
+                for (let a=0; a<gov.advisorLists.length; a++) 
+                {
                     // real experiment
                     if (blk4ForcedTrials == true)
                     {
-                        for (let n = 18;n<22;n++)
-                        {
-                            if (doInstruct == true)
-                            {
-                                let file = '<img width="1000" height="700" src="./instructions/Slide' + (n+1).toString() + '.jpeg"></img>';
-                                timeline.push({
-                                    type: 'instructions',
-                                    pages: [
-                                        file
-                                    ],
-                                    show_clickable_nav: true,
-                                    on_load: ()=>gov.drawProgressBar(),
-                                    on_finish: (trial)=>{
-                                        gov.fullscreenMode();
-                                        gov.storeMiscTrialData(trial);
-                                    }
-                                });
-                            }
-                        }
-                        for (let a=0; a<gov.advisorLists.length; a++) 
-                        {
-                            
-                            let trials = utils.getMatches(forcedblk4Trials, function(trial) 
-                            {
-                                return trial.block === gov.practiceBlockStructure.length;
+                        for (let b=1; b<gov.blockStructure.length; b++) {
+                            // find trials in this block
+                            let trials = utils.getMatches(gov.trials, function(trial) {
+                                return trial.block === b + gov.practiceBlockStructure.length;
                             });
-
                             // add the trials selecting the appropriate procedure for the trial type
                             while(trials.length)
                             {
                                 timeline.push({timeline: procedures[trials.shift().type]});
                             }
                             timeline.push(blockBreak);
-
                         }
-
-                        for (let n = 22;n<24;n++)
-                        {
-                            if (doInstruct == true)
+                        
+                    }
+                    else
+                    {
+                        if (doInstruct == true && blk4ForcedTrials == false)
+                        {    
+                            for (let n = 12;n<17;n++)
                             {
                                 let file = '<img width="1000" height="700" src="./instructions/Slide' + (n+1).toString() + '.jpeg"></img>';
                                 timeline.push({
@@ -1255,177 +1459,210 @@
                             }
                         }
 
+                        for (let b=0; b<gov.blockStructure.length; b++) {
+                            // find trials in this block
+                            let trials = utils.getMatches(gov.trials, function(trial) {
+                                return trial.block === b + gov.practiceBlockStructure.length;
+                            });
+                            // add the trials selecting the appropriate procedure for the trial type
+                            while(trials.length)
+                            {
+                                timeline.push({timeline: procedures[trials.shift().type]});
+                            }
+                            timeline.push(blockBreak);
+                        }
                     }
 
-                    for (let a=0; a<gov.advisorLists.length; a++) 
+                    // Get rid of residual trials.
+                    for (let t=0;t<numTrial[0]+numTrial[1]+1;t++)
                     {
-                        // real experiment
-                        if (blk4ForcedTrials == true)
-                        {
-                            for (let b=1; b<gov.blockStructure.length; b++) {
-                                // find trials in this block
-                                let trials = utils.getMatches(gov.trials, function(trial) {
-                                    return trial.block === b + gov.practiceBlockStructure.length;
-                                });
-                                // add the trials selecting the appropriate procedure for the trial type
-                                while(trials.length)
-                                {
-                                    timeline.push({timeline: procedures[trials.shift().type]});
-                                }
-                                timeline.push(blockBreak);
-                            }
-                            
-                        }
-                        else
-                        {
-                            if (doInstruct == true && blk4ForcedTrials == false)
-                            {    
-                                for (let n = 12;n<17;n++)
-                                {
-                                    let file = '<img width="1000" height="700" src="./instructions/Slide' + (n+1).toString() + '.jpeg"></img>';
-                                    timeline.push({
-                                        type: 'instructions',
-                                        pages: [
-                                            file
-                                        ],
-                                        show_clickable_nav: true,
-                                        on_load: ()=>gov.drawProgressBar(),
-                                        on_finish: (trial)=>{
-                                            gov.fullscreenMode();
-                                            gov.storeMiscTrialData(trial);
-                                        }
-                                    });
-                                }
-                            }
-
-                            for (let b=0; b<gov.blockStructure.length; b++) {
-                                // find trials in this block
-                                let trials = utils.getMatches(gov.trials, function(trial) {
-                                    return trial.block === b + gov.practiceBlockStructure.length;
-                                });
-                                // add the trials selecting the appropriate procedure for the trial type
-                                while(trials.length)
-                                {
-                                    timeline.push({timeline: procedures[trials.shift().type]});
-                                }
-                                timeline.push(blockBreak);
-                            }
-                        }
-
-                        // Get rid of residual trials.
-                        for (let t=0;t<numTrial[0]+numTrial[1]+1;t++)
-                        {
-                            timeline.pop();
-                        }
-
+                        timeline.pop();
                     }
 
-                    // Trust questionnaire
-                    if (doQuestionnaire == true)
-                    {
-                        timeline.push(questionEnd);
-                        order = utils.randPerm(2);
-                        for (let x = 0;x<endQs.length;x++)
+                }
+                // Trust questionnaire
+                // if (doQuestionnaire == true)
+                // {
+                //     timeline.push(questionEnd);
+                //     order = utils.randPerm(2);
+                //     for (let x = 0;x<endQs.length;x++)
+                //     {
+                //         timeline.push({
+                //             type: 'instructions',
+                //             pages: [''],
+                //             show_clickable_nav: false,
+                //             on_load: ()=>gov.drawRadioQuestionnaire(utils.shuffle(endQs[order[x]]),endAs,endNames[x]),
+                //             on_finish: (trial)=>
+                //             {
+                //                 gov.fullscreenMode();
+                //                 gov.storeMiscTrialData(trial);
+                //             }
+                //         });
+                //     }
+                //     timeline.push(genTrustQuestionnaire);
+                // }
+
+            console.log(gov.trials);
+            console.log(timeline);
+            let endIdx = timeline.length-1;
+
+            jsPsych.init({
+                timeline: timeline.slice(startingIdx,endIdx),
+                preload_images: instructionFiles,
+                on_finish: (trial)=>{
+                if (doQuestionnaire == true)
                         {
+                            timeline.push(questionEnd);
+                            timeline.push({
+                                    type: 'instructions',
+                                    pages: [''],
+                                    show_clickable_nav: false,
+                                    on_load: ()=>gov.drawRadioQuestionnaire(utils.shuffle(dotsQs),dotsAs,"Post-Dots Questions"),
+                                    on_finish: (trial)=>{
+                                        gov.fullscreenMode();
+                                        gov.storeMiscTrialData(trial);
+                                    }
+                                });
+
+                        }
+
+                        if (advisorEstimateTask == true && CBcondition == 2)
+                        {
+                            if (doInstruct == true)
+                            {
+                                timeline.push(task2Intro);
+                            }
+                            files = [];
+                            for (let n = 1;n<8;n++)
+                            {
+                                files.push('<img width="1000" height="700" src="./instructions/EstSlide' + (n).toString() + '.jpeg"></img>');
+                            }
+                            if (doInstruct == true)
+                            {
+                                timeline.push({
+                                    type: 'instructions',
+                                    pages: files,
+                                    show_clickable_nav: true,
+                                    allow_backward: true,
+                                    button_label_previous: 'Previous',
+                                    on_load: ()=>gov.drawProgressBar(),
+                                    on_finish: (trial)=>{
+                                        gov.fullscreenMode();
+                                        gov.storeMiscTrialData(trial);
+                                    }
+                                });
+                            }
+
                             timeline.push({
                                 type: 'instructions',
                                 pages: [''],
                                 show_clickable_nav: false,
-                                on_load: ()=>gov.drawRadioQuestionnaire(utils.shuffle(endQs[order[x]]),endAs,endNames[x]),
-                                on_finish: (trial)=>
+                                on_load: ()=>
                                 {
+                                    gov.drawAdvisorEstimateTask(mbaVarsTrain,'training');
+                                    gov.fullscreenMode();
+                                },
+                                on_finish: (trial)=>{
+                                    gov.fullscreenMode();
+                                    gov.storeMiscTrialData(trial);
+                            }});
+
+                            files = [];
+                            for (let n = 8;n<10;n++)
+                            {
+                                files.push('<img width="1000" height="700" src="./instructions/EstSlide' + (n).toString() + '.jpeg"></img>');
+                            }
+
+                            timeline.push({
+                                    type: 'instructions',
+                                    pages: files,
+                                    show_clickable_nav: true,
+                                    allow_backward: true,
+                                    button_label_previous: 'Previous',
+                                    on_load: ()=>gov.drawProgressBar(),
+                                    on_finish: (trial)=>{
+                                        gov.fullscreenMode();
+                                        gov.storeMiscTrialData(trial);
+                                    }
+                                });
+
+                            timeline.push({
+                                    type: 'instructions',
+                                    pages: [''],
+                                    show_clickable_nav: false,
+                                    on_load: ()=>
+                                    {
+                                        gov.drawAdvisorEstimateTask(mbaVarsAdj,'adjust');
+                                        gov.fullscreenMode();
+                                    },
+                                    on_finish: (trial)=>{
+                                        gov.fullscreenMode();
+                                        gov.storeMiscTrialData(trial);
+                                        gov.blockFeedback(1);
+                            }});
+
+                            files = [];
+                            for (let n = 10;n<12;n++) 
+                            {
+                                files.push('<img width="1000" height="700" src="./instructions/EstSlide' + (n).toString() + '.jpeg"></img>');
+                            }
+
+                            if (doInstruct == true)
+                            {
+                                timeline.push({
+                                    type: 'instructions',
+                                    pages: files,
+                                    show_clickable_nav: true,
+                                    allow_backward: true,
+                                    button_label_previous: 'Previous',
+                                    on_load: ()=>gov.drawProgressBar(),
+                                    on_finish: (trial)=>{
+                                        gov.fullscreenMode();
+                                        gov.storeMiscTrialData(trial);
+                                    }
+                                });
+                            }
+
+                            timeline.push({
+                                    type: 'instructions',
+                                    pages: [''],
+                                    show_clickable_nav: false,
+                                    on_load: ()=>
+                                    {
+                                        gov.drawAdvisorEstimateTask(mbaVarsRew,'reward');
+                                        gov.fullscreenMode();
+                                    },
+                                    on_finish: (trial)=>{
+                                        gov.fullscreenMode();
+                                        gov.storeMiscTrialData(trial);
+                                        gov.blockFeedback(1);
+                            }});
+                        }
+
+
+                        if (doQuestionnaire == true && estimateCB >= 0.5)
+                        {
+                            timeline.push(questionEnd);
+                            timeline.push({
+                                type: 'instructions',
+                                pages: [''],
+                                show_clickable_nav: false,
+                                on_load: ()=>gov.drawRadioQuestionnaire(estQs,estAs,"Post-Est Questions"),
+                                on_finish: (trial)=>{
                                     gov.fullscreenMode();
                                     gov.storeMiscTrialData(trial);
                                 }
                             });
                         }
-                        timeline.push(genTrustQuestionnaire);
-                    }
 
-                console.log(gov.trials);
-                console.log(timeline);
-
-                jsPsych.init({
-                timeline: timeline.slice(startingIdx,timeline.length),
-                on_finish: (trial)=>{
-
-                	if (advisorEstimateTask == true && estimateCB > 0.5)
-				    {
-				        timeline.push({
-				                type: 'instructions',
-				                pages: [''],
-				                show_clickable_nav: false,
-				                on_load: ()=>
-                                {
-                                    gov.drawAdvisorEstimateTask((utils.shuffle(mbaVars)).slice(0,9),'training');
-                                    gov.fullscreenMode();
-                                },
-				                on_finish: (trial)=>{
-				                    gov.fullscreenMode();
-				                    gov.storeMiscTrialData(trial);
-				                }});
-
-                        timeline.push({
-                                type: 'instructions',
-                                pages: [''],
-                                show_clickable_nav: false,
-                                on_load: ()=>
-                                {
-                                    rewardAmount = gov.drawAdvisorEstimateTask(mbaVarsTrain,'training');
-                                    gov.fullscreenMode();
-                                },
-                                on_finish: (trial)=>{
-                                    gov.fullscreenMode();
-                                    gov.storeMiscTrialData(trial);
-                                }});
-
-                        timeline.push({
-                                type: 'instructions',
-                                pages: [''],
-                                show_clickable_nav: false,
-                                on_load: ()=>
-                                {
-                                    rewardAmount = gov.drawAdvisorEstimateTask(mbaVarsAdj,'adjust');
-                                    gov.fullscreenMode();
-                                },
-                                on_finish: (trial)=>{
-                                    gov.fullscreenMode();
-                                    gov.storeMiscTrialData(trial);
-                                }});
-
-                        timeline.push({
-                                type: 'instructions',
-                                pages: [''],
-                                show_clickable_nav: false,
-                                on_load: ()=>
-                                {
-                                    rewardAmount = gov.drawAdvisorEstimateTask(mbaVarsRew,'reward');
-                                    gov.fullscreenMode();
-                                },
-                                on_finish: (trial)=>{
-                                    gov.fullscreenMode();
-                                    gov.storeMiscTrialData(trial);
-                                }});
-
-				        jsPsych.init({
-                			timeline: timeline.slice(timeline.length-1,timeline.length),
-                				on_finish: (trial)=>{
-                					gov.drawDebriefForm();
-                		}});
-				    }
-
-				    else
-				    {
-				    	gov.drawDebriefForm();
-				    }      
-                }
-                });
-
-        }});    
-    }
-
-
-
+                        jsPsych.init({
+                        timeline: timeline.slice(endIdx,timeline.length),
+                            on_finish: (trial)=>{
+                                gov.drawDebriefForm();
+                        }
+                        });
+                }});
+            }});
 </script>
 </body>
 </html>

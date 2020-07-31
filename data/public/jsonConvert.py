@@ -20,8 +20,10 @@ os.chdir(currentDir)
 # Anything pre-dots task is contained in the JSON object miscTrials
 # These are flags to say what data we should be looking for
 demoFlag = 0
-surveyFlag = 0
+surveyFlag = 1
 estimateFlag = 1
+miscFlag = 1
+surveyFilename = ""
 
 logf = open("jsonConvertLog.txt", "w+")
 
@@ -30,7 +32,6 @@ logf = open("jsonConvertLog.txt", "w+")
 recentFiles = []
 for subdir, dirs, files in os.walk("./"):
     for di in dirs:
-        print(di)
         if (di[0] != "_"):
             lookin = "./" + di
             for jsonsubdir, jsondirs, jsonfiles in os.walk(lookin):
@@ -40,16 +41,21 @@ for subdir, dirs, files in os.walk("./"):
                     if (jsonfilename[0] == '.DS'):
                         continue
                     time = jsonfilename[3] + jsonfilename[4] + jsonfilename[5]
+                    if (time[0] == "0"):
+                        offset = "0"
+                    else:
+                        offset = ""
                     time = int(float(time))
                     dirTimes.append(time)
-            recentfile = str(max(dirTimes))
+            recentfile = offset + str(max(dirTimes))
             recentfile = "./" + di + "/" + jsonfilename[0] + "_" + jsonfilename[1] + "_" + jsonfilename[2] + "_" + recentfile[0:2] + "_" + recentfile[2:4] + "_" + recentfile[4:6] + "_" + jsonfilename[6]
             recentFiles.append(recentfile)
 
+
 for file in recentFiles:
     print(file)
-    surveyData = [[],[],[],[]]
-    questions = [[],[],[],[]]
+    surveyData = []
+    questions = []
     #try:
     filename = file.split("_")
     filename[0] = ((filename[0]).split("/"))[2]
@@ -73,6 +79,9 @@ for file in recentFiles:
     dataJson = json.loads(txt)
 
     ID = dataJson["rawData"]["participantId"]
+    miscTrials = dataJson["rawData"]["miscTrials"]
+    estimates = dataJson["rawData"]["estimates"]
+    surveys = dataJson["rawData"]["radio"]
 
     if (demoFlag == 1):
         # Get the demographic data from the JSON
@@ -89,68 +98,76 @@ for file in recentFiles:
             # Open subject file to write. Creates new file if it doesn't already exist, otherwise it truncates the current file.
             with open(subjectFilename, mode='w') as subject_file:
                 subject_writer = csv.writer(subject_file, delimiter=',', quotechar='"', quoting=csv.QUOTE_MINIMAL)
-        
-            # Write the column headers first.
-            subject_writer.writerow(['ID', 'date', 'gender', 'age', 'deviceUse'])
-            # Write the corresponding data under each column header.
-            subject_writer.writerow([ID, date, gender, age, deviceUse])
+                # Write the column headers first.
+                subject_writer.writerow(['ID', 'date', 'gender', 'age', 'deviceUse'])
+                # Write the corresponding data under each column header.
+                subject_writer.writerow([ID, date, gender, age, deviceUse])
 
         except:
             print("couldn't retrive demo info")
 
-    if (surveyFlag == 1):
+    if (miscFlag == 1):
+        dotReward = dataJson["rawData"]["dotReward"]
+        estReward = dataJson["rawData"]["estimateReward"]
+        totReward = dataJson["rawData"]["totalReward"]
+        condition = dataJson["rawData"]["CBcondition"]
+        # Subject data filename is made up of date and participant ID and is saved in the private folder.
+        subjectFilename = '../../private/Subjects/' + filename[2] + filename[1] + filename[0] + '_' + ID + '_SUBJECT.csv'
 
-        miscTrials = dataJson["rawData"]["miscTrials"]
-        surveys = len(miscTrials)
+        # Open subject file to write. Creates new file if it doesn't already exist, otherwise it truncates the current file.
+        with open(subjectFilename, mode='w') as subject_file:
+            subject_writer = csv.writer(subject_file, delimiter=',', quotechar='"', quoting=csv.QUOTE_MINIMAL)
+            # Write the column headers first.
+            subject_writer.writerow(['dotReward', 'estimateReward', 'totalReward', 'CBcondition'])
+            # Write the corresponding data under each column header.
+            subject_writer.writerow([dotReward, estReward, totReward, condition])
+
+    if (surveyFlag == 1):
+        surveysLen = len(surveys)
         count = 0
-        for x in range(1,surveys):
-            if "0" in miscTrials[x]:
-                for y in range(0,len(miscTrials[x])):
-                    if str(y) in miscTrials[x]:
-                        surveyData[count]
-                        surveyData[count].append(miscTrials[x][str(y)]["answer"])
-                        questions[count].append(miscTrials[x][str(y)]["question"])
-                count = count + 1
+        for x in range(1,surveysLen):
+            if 'answer' not in surveys[x]:
+                surveyData.append(surveys[x][1]["answer"])
+                questions.append(surveys[x][0]["question"])
             else:
-                continue
+                surveyData.append(surveys[x]["answer"])
+                questions.append(surveys[x]["question"])
 
         surveyData = list(filter(None, surveyData))
         questions = list(filter(None, questions))
 
         if len(surveyData) > 0:
-            for n in range(0,len(surveyData)):
-                surveyFilename = '../Surveys/' + filename[2] + filename[1] + filename[0] + '_' + ID + '_SURVEY' + str(n+1) + '.csv'
-                with open(surveyFilename, mode='w') as survey_file:
-                    survey_writer = csv.writer(survey_file, delimiter=',', quotechar='"', quoting=csv.QUOTE_MINIMAL)
-                    survey_writer.writerow(questions[n])
-                    survey_writer.writerow(surveyData[n])
+            surveyFilename = '../Surveys/' + filename[2] + filename[1] + filename[0] + '_' + ID + '_SURVEY.csv'
+            with open(surveyFilename, mode='w') as survey_file:
+                survey_writer = csv.writer(survey_file, delimiter=',', quotechar='"', quoting=csv.QUOTE_MINIMAL)
+                survey_writer.writerow(questions)
+                survey_writer.writerow(surveyData)
 
     if (estimateFlag == 1):
         #try:
+        estimatesLen = len(estimates)
+        count = 0
+        estimateQuestions = ['reward choice', 'model guess', 'own guess']
         estimateFilename = '../EstimateData/' + ID + '_ESTIMATE.csv'
-        # Need to add a check for trial type and to add data differently
-        # Training, adjust, influence, reward
         with open(estimateFilename, mode='w+') as dataOut:
             estimate_writer = csv.writer(dataOut, delimiter=',', quotechar='"', quoting=csv.QUOTE_MINIMAL)
-            miscTrials = dataJson["rawData"]["miscTrials"]
-            factorNames = miscTrials[0]["0"][0]["question"]["factorNames"]
+            factorNames = estimates[x][0]["question"]["factorNames"]
             headings = ['Participant Estimate', 'Advisor Estimate', 'True Answer', 'Advisor Error', 'Participant Error', 'Trial Type'] + factorNames
             estimate_writer.writerow(headings)
-            advLength = len(miscTrials[0])
-            miscLength = len(miscTrials)
-            print(advLength)
-            for y in range(0,int(miscLength)):
-                for x in range(0,int(advLength-4)):
-                    pptEst = miscTrials[y][str(x)][1]["answer"]
-                    advEst = miscTrials[y][str(x)][0]["question"]["advEstimate"]
-                    trueAns = miscTrials[y][str(x)][0]["question"]["trueAnswer"]
-                    advErr = miscTrials[y][str(x)][0]["question"]["advErr"]
-                    pptErr = abs(int(trueAns) - int(pptEst))
-                    trialType = miscTrials[y][str(x)][2]["taskType"]
-                    factorVals = miscTrials[y][str(x)][0]["question"]["factorValues"]
-                    rowData = [pptEst, advEst, trueAns, advErr, pptErr, trialType] + factorVals
-                    print(rowData)
-                    estimate_writer.writerow(rowData)
+            for x in range(1,estimatesLen):
+                # Need to add a check for trial type and to add data differently
+                # Training, adjust, influence, reward
+                factorNames = estimates[x][0]["question"]
+                pptEst = estimates[x][1]["answer"]
+                advEst = estimates[x][0]["question"]["advEstimate"]
+                trueAns = estimates[x][0]["question"]["trueAnswer"]
+                advErr = estimates[x][0]["question"]["advErr"]
+                pptErr = abs(int(trueAns) - int(pptEst))
+                trialType = estimates[x][2]["taskType"]
+                factorVals = estimates[x][0]["question"]["factorValues"]
+                rowData = [pptEst, advEst, trueAns, advErr, pptErr, trialType] + factorVals
+                estimate_writer.writerow(rowData)
+
 
         #except:
         #    print("No estimate data")
@@ -162,6 +179,10 @@ for file in recentFiles:
     # Trials data filename is made up of date and participant ID and is saved in the public folder.
     trialsFilename = '../Trials/' + filename[2] + filename[1] + filename[0] + '_' + ID + '_TRIALS.csv'
 
+
+
+    
+
     # Open trials file to write.
     with open(trialsFilename, mode='w') as trials_file:
         subject_writer = csv.writer(trials_file, delimiter=',', quotechar='"', quoting=csv.QUOTE_MINIMAL)
@@ -169,7 +190,7 @@ for file in recentFiles:
         # Write column headers in order. Make sure this matches the order of data below in subject_writer.writerow([currentTrial["id"]....
         subject_writer.writerow(['trialNumber', 'block', 'staircase', 'wherelarger', 'dotdifference', 'int1', 'cj1', 'cor1', 'int2', 'cj2', 'cor2', 'trialType', 'whichAdvisor', 'whereChoice', 'advAnswer', 'advCorrect', 'advConfidence', 'rt1', 'rt2', 'ctcTime'])
         for f in range(0,len(trials)):
-            if f == 450:
+            if f == 240:
                 break
             currentTrial = trials[f]
 

@@ -19,6 +19,21 @@
 body {
     background-color: #a3a3a3;
 }
+table {
+  font-family: arial, sans-serif;
+  border-collapse: collapse;
+}
+
+th.estimate {
+  border: 1px solid #dddddd;
+  padding-top: 0.5em;
+  padding-left: 0.5em;
+  padding-right: 0.5em;
+}
+
+tr.estimate:nth-child(even) {
+  background-color: #dddddd;
+}
 .hidden {
     display: none !important;
 }
@@ -47,7 +62,7 @@ div.advisorChoice-prevAnswer {
     width: var(--slider-thumb-width);
     height: var(--slider-track-height);
     top: 1px;
-    background-color: #36bce2;
+    background-color: #e23636;
 }
 div.advisorChoice-advAnswer {
     z-index: 1;
@@ -124,10 +139,15 @@ div.advisorChoice-choice:hover div.jspsych-jas-present-advice-image {
 
 #jspsych-instructions-next
 {
-    left:50%;
-    margin-right: -50%;
-    transform: translate(-50%, -50%);
+    margin-right: 50%;
+    transform: translate(50%, 50%);
 }
+
+#jspsych-instructions-back
+{
+    transform: translate(10%, 50%);
+}
+
 
 #progressbar-outer {
     width: 80%;
@@ -209,6 +229,7 @@ div.jspsych-jas-present-advice-arrow-left {
     margin-right: -50%;
     transform: translate(-50%,0%);
     text-align: center;
+    z-index: 0;
 }
 
 div.jspsych-jas-present-advice-arrow-right {
@@ -216,6 +237,7 @@ div.jspsych-jas-present-advice-arrow-right {
     margin-right: -50%;
     transform: translate(-50%,0%);
     text-align: right;
+    z-index: 0;
 }
 
 div.jspsych-jas-present-advice-image {

@@ -1180,20 +1180,20 @@ class Governor {
      * Draw a progress bar at the top of the screen
      */
     drawProgressBar() {
-        if (document.querySelector('#jspsych-progressbar-container') === null) {
-            let div = document.createElement('div');
-            div.id = 'jspsych-progressbar-container';
-            let outer = document.createElement('div');
-            outer.id = 'progressbar-outer';
-            div.appendChild(outer);
-            let inner = document.createElement('div');
-            inner.id = 'progressbar-inner';
-            outer.appendChild(inner);
-            let content = document.querySelector('.jspsych-content-wrapper');
-            content.parentElement.insertBefore(div, content);
-        }
-        let inner = document.querySelector('#progressbar-inner');
-        inner.style.width = ((this.currentTrialIndex + 1) / this.trials.length * 100).toString()+'%';
+        // if (document.querySelector('#jspsych-progressbar-container') === null) {
+        //     let div = document.createElement('div');
+        //     div.id = 'jspsych-progressbar-container';
+        //     let outer = document.createElement('div');
+        //     outer.id = 'progressbar-outer';
+        //     div.appendChild(outer);
+        //     let inner = document.createElement('div');
+        //     inner.id = 'progressbar-inner';
+        //     outer.appendChild(inner);
+        //     let content = document.querySelector('.jspsych-content-wrapper');
+        //     content.parentElement.insertBefore(div, content);
+        // }
+        // let inner = document.querySelector('#progressbar-inner');
+        // inner.style.width = ((this.currentTrialIndex + 1) / this.trials.length * 100).toString()+'%';
     }
 }
 

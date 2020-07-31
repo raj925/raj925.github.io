@@ -203,28 +203,32 @@ const bigFiveQs = ["I see myself as someone who is talkative",
 const trustAIAs = ["Strongly Disagree", "Moderately Disagree", "Somewhat Disagree", "Neither Agree nor Disagree", "Somewhat Agree", "Moderately Agree", "Strongly Agree"];
 const fiveAs = ["Disagree Strongly", "Disagree a Little", "Neither Agree nor Disagree", "Agree a Little", "Agree Strongly"];
 
-const advisor1Qs = ["The human advisor is reliable.",
+const dotsQs = ["The human advisor is reliable.",
 "The human advisor is dependable.",
 "I can trust the human advisor.",
-"I am confident in the human advisor."];
-
-const advisor2Qs = ["The computer advisor is reliable.",
+"I am confident in the human advisor.",
+"The computer advisor is reliable.",
 "The computer advisor is dependable.",
 "I can trust the computer advisor.",
-"I am confident in the computer advisor."];
+"I am confident in the computer advisor.",
+"I feel that the task was too easy.",
+"This task would be much harder without an advisor.",
+"I believe the human's advice was from a real person who was a past participant.",
+"I believe the computer's advice was from a real algorithm."];
 
-const advisorAs = ["Strongly Disagree", "Disagree", "Neutral", "Agree", "Strongly Agree"];
+const dotsAs = ["Strongly Disagree", "Disagree", "Neutral", "Agree", "Strongly Agree"];
+
+const estQs = ["How much confidence do you have in the statistical model's estimates?",
+"How much confidence do you have in your estimates?"];
+
+const estAs = ["None", "Little", "Some", "A Fair Amount", "A Lot"];                                                                          
 
 const test1Qs = ["Question 1?","Question 2?","Question 3?"];
 const test2Qs = ["Another Question 1?","Another Question 2?","Another Question 3?"];
 const testNames = ["test1", "test2"];
 
 // Qs = [cogQs, closQs];
-Qs = [test1Qs, test2Qs];
-As = [cogAs, closAs];
+// Qs = [test1Qs, test2Qs];
+// As = [cogAs, closAs];
 // names = [cogName, closName] ;
-names = testNames;
-
-endQs = [advisor1Qs, advisor2Qs];
-endAs = advisorAs;
-endNames = ['humanAdvisor','algorAdvisor']
+// names = testNames;
