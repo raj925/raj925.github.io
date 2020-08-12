@@ -1,0 +1,30 @@
+Participant Estimate,Advisor Estimate,True Answer,Advisor Error,Participant Error,Trial Type,Race,"Socioeconomic Status (first = lowest, fifth = highest)",Desired Occupation at age 30,Predicted Highest Degree,Region of Country,Time taken PSAT,How many friends are not going to college,Favourite school subject,Taken any AP test
+68,56,66,10,2,training,"White, non-Hispanic",Fifth quintile (highest),Healthcare Practitioners and Technical Occupations,Complete Bachelor's degree,South,Twice,None of them,Social studies/history/government/civics,No
+70,54,72,18,2,training,"White, non-Hispanic",Third quintile,Don't know,Don't know,South,Once,None of them,Other subject,Yes
+67,35,70,35,3,training,"White, non-Hispanic",Fourth quintile,Management Occupations,Complete Associate's degree,Midwest,Once,More than half,Other subject,No
+65,27,11,16,54,training,"Black/African-American, non-Hispanic",Third quintile,Don't know,"Start, but not complete certificate/diploma from school providing occ training",Midwest,Once,Less than half,Art,No
+77,83,98,15,21,training,"White, non-Hispanic",Fifth quintile (highest),Computer and Mathematical Occupations,Complete Bachelor's degree,West,Twice,Don't know,Computer Science,Yes
+50,56,52,4,2,training,"White, non-Hispanic",Fourth quintile,Don't know,Complete Master's degree,Midwest,Once,None of them,Art,No
+76,51,32,19,44,training,"White, non-Hispanic",Third quintile,Healthcare Practitioners and Technical Occupations,Don't know,Midwest,Once,Less than half,Mathematics,No
+78,45,13,32,65,training,"Black/African-American, non-Hispanic",Second quintile,Healthcare Practitioners and Technical Occupations,Complete Ph.D./M.D./law degree/other high level professional degree,South,Twice,None of them,Foreign Language,No
+40,29,4,25,36,training,"White, non-Hispanic",First quintile (lowest),Don't know,Complete certificate/diploma from school providing occupational training,South,Never,Don't know,Social studies/history/government/civics,No
+65,54,36,18,29,adjust,"White, non-Hispanic",Fourth quintile,Don't know,Complete Ph.D./M.D./law degree/other high level professional degree,South,Once,Less than half,Social studies/history/government/civics,No
+83,79,99,20,16,adjust,"Asian, non-Hispanic",Fifth quintile (highest),Don't know,Complete Master's degree,Midwest,Once,Don't know,English,Yes
+60,50,81,31,21,adjust,"White, non-Hispanic",First quintile (lowest),Healthcare Practitioners and Technical Occupations,Complete Master's degree,South,Twice,About half,Social studies/history/government/civics,Yes
+35,42,28,14,7,adjust,"More than one race, non-Hispanic",Second quintile,Don't know,Complete Associate's degree,Midwest,Once,Don't know,Social studies/history/government/civics,No
+50,60,24,36,26,adjust,"White, non-Hispanic",First quintile (lowest),Construction and Extraction Occupations,Complete Bachelor's degree,South,Twice,Less than half,Mathematics,Yes
+50,66,53,13,3,adjust,"White, non-Hispanic",First quintile (lowest),Healthcare Practitioners and Technical Occupations,Complete Bachelor's degree,Northeast,3 or more times,None of them,Science,Yes
+56,61,26,35,30,adjust,"More than one race, non-Hispanic",Fifth quintile (highest),Don't know,Complete Bachelor's degree,South,Never,None of them,Art,Yes
+54,53,66,13,12,adjust,"White, non-Hispanic",Fourth quintile,"Education, Training, and Library Occupations",Complete Bachelor's degree,Northeast,Once,Don't know,Social studies/history/government/civics,No
+70,67,89,22,19,adjust,"White, non-Hispanic",Fourth quintile,"Life, Physical, and Social Science Occupations",Complete Ph.D./M.D./law degree/other high level professional degree,Northeast,Twice,Don't know,Foreign Language,No
+30,37,20,17,10,adjust,"Black/African-American, non-Hispanic",Fourth quintile,Don't know,Complete certificate/diploma from school providing occupational training,West,Don't know what this is,None of them,Mathematics,No
+72,63,85,22,13,reward,"More than one race, non-Hispanic",Fourth quintile,Uncodeable,Complete Ph.D./M.D./law degree/other high level professional degree,Northeast,Twice,Don't know,Science,No
+35,55,49,6,14,reward,"Hispanic, race specified",First quintile (lowest),Healthcare Practitioners and Technical Occupations,Complete Master's degree,Northeast,Don't know what this is,Less than half,Mathematics,Yes
+43,56,85,29,42,reward,"More than one race, non-Hispanic",Fourth quintile,Business and Financial Operations Occupations,Complete Bachelor's degree,South,Once,Don't know,English,Yes
+27,40,17,23,10,reward,"Hispanic, race specified",First quintile (lowest),Don't know,Complete Associate's degree,West,Never,None of them,Mathematics,No
+37,41,43,2,6,reward,"Asian, non-Hispanic",First quintile (lowest),Don't know,Don't know,Midwest,Twice,More than half,English,No
+50,41,78,37,28,reward,"More than one race, non-Hispanic",Third quintile,"Arts, Design, Entertainment, Sports, and Media Occupations",Complete Bachelor's degree,West,Never,None of them,Art,No
+50,53,68,15,18,reward,"White, non-Hispanic",Third quintile,Business and Financial Operations Occupations,Complete Master's degree,Midwest,Never,Less than half,Mathematics,No
+72,44,40,4,32,reward,"White, non-Hispanic",Fifth quintile (highest),Management Occupations,Complete HS diploma/GED/alternative HS credential,Midwest,Once,Don't know,Physical education or gym,No
+77,49,23,26,54,reward,"Hispanic, race specified",Fifth quintile (highest),"Arts, Design, Entertainment, Sports, and Media Occupations",Complete Bachelor's degree,South,Twice,Less than half,Other subject,No
+67,76,94,18,27,reward,"Asian, non-Hispanic",Fourth quintile,Healthcare Practitioners and Technical Occupations,Complete Master's degree,South,Twice,Don't know,Science,Yes

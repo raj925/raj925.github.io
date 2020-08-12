@@ -584,14 +584,14 @@ class DotTask extends Governor {
                 let threshold = threshHitList.length / threshTrialList.length * 100;
                 threshold = (Math.round(threshold*100)/100);
                 let scoreVal = (Math.round(score*100)/100);
-                let rewardAmount = (Math.round(scoreVal - threshold))*0.5;
+                let rewardAmount = (Math.round(scoreVal - threshold))*0.25;
                 if (rewardAmount < 0)
                 {
                     rewardAmount = 0;
                 }
-                if (rewardAmount > 2.5)
+                if (rewardAmount > 1.25)
                 {
-                    rewardAmount = 2.5;
+                    rewardAmount = 1.25;
                 }
                 p.innerHTML = p.innerHTML + "<br /><p>" + "Based on your performance in the last block, you are awarded £" + rewardAmount + "</p>";;
                 this.totalReward = this.totalReward + rewardAmount;

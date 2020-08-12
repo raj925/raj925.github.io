@@ -37,13 +37,14 @@ with open(aggregateFilename, mode='w') as dataOut:
     # Update the below row to change the column headers for aggregate data file.
     # Make sure the order and length matches the variables added on each row in the last line of this script (ie csv_writer.writerow([...]))
     allHeads = ['Participant ID', 'Final Dot Difference', 'Num Of Trials', 'Choice of Human', 'Choice of Algorithm', 'Block 4 Human Acc', 'Block 4 Algor Acc', 'Human Choice After Block 4', 'Algor Choice After Block 4', 'Top Box Chosen', 'Left Box Chosen', 'Preference Strength', 'Max Cj', 'Min Cj', 'Cj Range', 'Num of Unique Cj Values', 'Advice Ignored Trials', 'Mean Cj Change', 'Cj1 Mean Resolution', 'Cj2 Mean Resolution', 'Mean Cj1 Accuracy', 'Mean Cj2 Accuracy', 'Sway of Human Advice', 'Sway of Algor Advice', 'Mean RT1', 'Mean RT2', 'Mean CTC', 'AccQuant1', 'AccQuant2', 'AccQuant3', 'AccQuant4', 'AdvQuant1', 'AdvQuant2', 'AdvQuant3', 'AdvQuant4', 'CjQuant1', 'CjQuant2', 'CjQuant3', 'CjQuant4', 'Mean Cj1', 'Mean Cj2', 'St Dev Cj1', 'St Dev Cj2', 'Human Agreed %', 'Algor Agreed %', 'Algor Agreed % Diff', 'Human Agreed Conf Diff', 'Algor Agreed Conf Diff', 'Human Disagreed Conf Diff', 'Algor Disagreed Conf Diff', 'Algor Relative Influence', 'dd Block 1 End', 'dd Block 2 End', 'dd Block 3 End', 'Block 1 Accuracy', 'Block 2 Accuracy', 'Block 3 Accuracy', 'Block 4 Algor Choice']
-    count = 0;
+    count = 0
+    surveyCount = 0
+    surveyHeads = []
     # For all individual participant files (which jsonConvert names in the form TRIALS.csv)
     for file in glob.glob("*TRIALS.csv"):
         estimateVars = []
         estimateHeads = []
         surveyVars = []
-        surveyHeads = []
         miscVars = []
         miscHeads = []
         with open(file) as dataIn:
@@ -106,13 +107,20 @@ with open(aggregateFilename, mode='w') as dataOut:
 
             if (surveyFlag == 1):
                 for surveyFile in os.listdir('../Surveys'):
+                    print(surveyFile)
                     surveyName = date + '_' + pid + '_SURVEY.csv'
                     if fnmatch.fnmatch(surveyFile, surveyName):
                         f = '../Surveys/' + surveyName
                         with open(f) as surveyDataIn:
-                            reader = csv.reader(surveyDataIn)
-                            surveyHeads = next(reader)
-                            surveyVars = next(reader)
+                            try:
+                                surveydf = pd.read_csv(surveyDataIn)
+                                if (surveyCount == 0):
+                                    surveyHeads = surveydf.columns.tolist()
+                                    surveyCount = 1
+                                surveydf = surveydf[surveyHeads]
+                                surveyVars = surveydf.values[0]
+                            except Exception as e:
+                                print(e)
                                 
             #Section for survey variables + (reward choice, model guess, own guess)
 
@@ -131,7 +139,7 @@ with open(aggregateFilename, mode='w') as dataOut:
             blk3dd = dd.iloc[90]
             blk1acc = np.sum(cor1.loc[df["block"] == 1])/30
             blk2acc = np.sum(cor1.loc[df["block"] == 2])/30
-            blk3acc = np.sum(cor1.loc[df["block"] == 3])/30
+            blk3acc = np.sum(cor1.loc[df["block"] == 3])/60
 
             # All subsqeuent analysis just on experimental trials
             df = df.loc[df["block"] > 3]
@@ -168,7 +176,7 @@ with open(aggregateFilename, mode='w') as dataOut:
 
             cj1Orig = cj1
             cj2Orig = cj2
-            cjDiff = abs(cj2 - cj1)
+            cjDiff = cj2 - cj1
             mask = (int1 == 0)
             mask2 = (int2 == 0)
             cj1Orig[mask] = (cj1Orig[mask])*-1

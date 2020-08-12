@@ -125,7 +125,7 @@ for file in recentFiles:
     if (surveyFlag == 1):
         surveysLen = len(surveys)
         count = 0
-        for x in range(1,surveysLen):
+        for x in range(0,surveysLen):
             if 'answer' not in surveys[x]:
                 surveyData.append(surveys[x][1]["answer"])
                 questions.append(surveys[x][0]["question"])
